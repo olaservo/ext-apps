@@ -41,7 +41,7 @@ import {
   McpUiResourceTeardownRequest,
   McpUiResourceTeardownResultSchema,
 } from "./types";
-export { LATEST_PROTOCOL_VERSION } from "./types";
+export * from "./types";
 export { PostMessageTransport } from "./message-transport";
 
 type HostOptions = ProtocolOptions;
