@@ -101,7 +101,9 @@ interface UIResource {
    * Includes Content Security Policy configuration, dedicated domain settings,
    * and visual preferences.
    */
-  _meta?: UIResourceMeta
+  _meta?: {
+    ui?: UIResourceMeta;
+  }
 }
 
 interface UIResourceMeta {
