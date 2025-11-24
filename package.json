@@ -23,7 +23,7 @@
     "dist"
   ],
   "scripts": {
-    "start": "cd examples/example-host && npm i && npm start",
+    "start": "cd examples/simple-host && npm i && npm start",
     "build": "bun build.bun.ts",
     "prepare": "npm run build",
     "prettier:base-cmd": "prettier -u --ignore-path ./.gitignore --ignore-path ./.prettierignore",

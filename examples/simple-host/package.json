@@ -6,7 +6,7 @@
   "scripts": {
     "start:server": "python3 serve.py",
     "start:mcp-server": "cd ../simple-server && npm install && npm run start",
-    "start:proxy": "python3 proxy/serve.py",
+    "start:proxy": "python3 serve.py",
     "build": "concurrently 'INPUT=example-host.html vite build' 'INPUT=example-host-react.html vite build' 'INPUT=sandbox.html vite build'",
     "server": "bun server.ts",
     "start": "NODE_ENV=development npm run build && concurrently 'npm run start:server' 'npm run start:mcp-server' 'npm run start:proxy'"
