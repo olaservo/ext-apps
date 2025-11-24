@@ -36,94 +36,122 @@ const getServer = async () => {
   );
 
   // Load HTML for both UIs
-  const [vanillaHtml, reactHtml] = await Promise.all([
+  const [rawHtml, vanillaHtml, reactHtml] = await Promise.all([
+    loadHtml("ui-raw"),
     loadHtml("ui-vanilla"),
     loadHtml("ui-react"),
   ]);
 
-  // --- Vanilla UI Resource & Tool ---
-  const vanillaResource: Resource = {
-    name: "ui-vanilla-template",
-    uri: "ui://vanilla",
-    title: "Vanilla UI Template",
-    description: "A simple vanilla JS UI",
-    mimeType: "text/html+mcp",
+  const registerResource = (resource: Resource, htmlContent: string) => {
+    server.registerResource(
+      resource.name,
+      resource.uri,
+      resource,
+      async (): Promise<ReadResourceResult> => ({
+        contents: [
+          {
+            uri: resource.uri,
+            mimeType: resource.mimeType,
+            text: htmlContent,
+          },
+        ],
+      }),
+    );
+    return resource;
   };
 
-  server.registerResource(
-    vanillaResource.name,
-    vanillaResource.uri,
-    vanillaResource,
-    async (): Promise<ReadResourceResult> => ({
-      contents: [
-        {
-          uri: vanillaResource.uri,
-          mimeType: vanillaResource.mimeType,
-          text: vanillaHtml,
+  {
+    const rawResource = registerResource(
+      {
+        name: "ui-raw-template",
+        uri: "ui://raw",
+        title: "Raw UI Template",
+        description: "A simple raw HTML UI",
+        mimeType: "text/html+mcp",
+      },
+      rawHtml,
+    );
+
+    server.registerTool(
+      "create-ui-raw",
+      {
+        title: "Raw UI",
+        description: "A tool that returns a raw HTML UI (no Apps SDK runtime)",
+        inputSchema: {
+          message: z.string().describe("Message to display"),
         },
-      ],
-    }),
-  );
-
-  server.registerTool(
-    "create-ui-vanilla",
-    {
-      title: "Vanilla UI",
-      description: "A tool that returns a simple vanilla JS UI",
-      inputSchema: {
-        message: z.string().describe("Message to display"),
-      },
-      _meta: {
-        "ui/resourceUri": vanillaResource.uri,
-      },
-    },
-    async ({ message }): Promise<CallToolResult> => ({
-      content: [{ type: "text", text: JSON.stringify({ message }) }],
-      structuredContent: { message },
-    }),
-  );
-
-  // --- React UI Resource & Tool ---
-  const reactResource: Resource = {
-    name: "ui-react-template",
-    uri: "ui://react",
-    title: "React UI Template",
-    description: "A React-based UI",
-    mimeType: "text/html+mcp",
-  };
-
-  server.registerResource(
-    reactResource.name,
-    reactResource.uri,
-    reactResource,
-    async (): Promise<ReadResourceResult> => ({
-      contents: [
-        {
-          uri: reactResource.uri,
-          mimeType: reactResource.mimeType,
-          text: reactHtml,
+        _meta: {
+          "ui/resourceUri": rawResource.uri,
         },
-      ],
-    }),
-  );
+      },
+      async ({ message }): Promise<CallToolResult> => ({
+        content: [{ type: "text", text: JSON.stringify({ message }) }],
+        structuredContent: { message },
+      }),
+    );
+  }
 
-  server.registerTool(
-    "create-ui-react",
-    {
-      title: "React UI",
-      description: "A tool that returns a React-based UI",
-      inputSchema: {
-        message: z.string().describe("Message to display"),
+  {
+    const vanillaResource = registerResource(
+      {
+        name: "ui-vanilla-template",
+        uri: "ui://vanilla",
+        title: "Vanilla UI Template",
+        description: "A simple vanilla JS UI",
+        mimeType: "text/html+mcp",
       },
-      _meta: {
-        "ui/resourceUri": reactResource.uri,
+      vanillaHtml,
+    );
+
+    server.registerTool(
+      "create-ui-vanilla",
+      {
+        title: "Vanilla UI",
+        description: "A tool that returns a vanilla TS + Apps SDK UI",
+        inputSchema: {
+          message: z.string().describe("Message to display"),
+        },
+        _meta: {
+          "ui/resourceUri": vanillaResource.uri,
+        },
       },
-    },
-    async ({ message }): Promise<CallToolResult> => ({
-      content: [{ type: "text", text: JSON.stringify({ message }) }],
-      structuredContent: { message },
-    }),
-  );
+      async ({ message }): Promise<CallToolResult> => ({
+        content: [{ type: "text", text: JSON.stringify({ message }) }],
+        structuredContent: { message },
+      }),
+    );
+  }
+
+  {
+    const reactResource = registerResource(
+      {
+        name: "ui-react-template",
+        uri: "ui://react",
+        title: "React UI Template",
+        description: "A React-based UI",
+        mimeType: "text/html+mcp",
+      },
+      reactHtml,
+    );
+
+    server.registerTool(
+      "create-ui-react",
+      {
+        title: "React UI",
+        description: "A tool that returns a React-based UI",
+        inputSchema: {
+          message: z.string().describe("Message to display"),
+        },
+        _meta: {
+          "ui/resourceUri": reactResource.uri,
+        },
+      },
+      async ({ message }): Promise<CallToolResult> => ({
+        content: [{ type: "text", text: JSON.stringify({ message }) }],
+        structuredContent: { message },
+      }),
+    );
+  }
 
   // --- Common tool: get-weather ---
   server.registerTool(
@@ -252,7 +280,6 @@ app.delete("/mcp", async (req: Request, res: Response) => {
 
 app.listen(MCP_PORT, () => {
   console.log(`MCP Server listening on http://localhost:${MCP_PORT}/mcp`);
-  console.log(`  Tools: create-ui-vanilla, create-ui-react, get-weather`);
 });
 
 process.on("SIGINT", async () => {

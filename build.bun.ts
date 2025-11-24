@@ -8,20 +8,28 @@ const isDevelopment = Bun.env.NODE_ENV === "development";
 
 // Build all JavaScript/TypeScript files
 function buildJs(entrypoint: string, opts: Record<string, any> = {}) {
-    return Bun.build({
-        entrypoints: [entrypoint],
-        outdir: "dist",
-        target: "browser",
-        minify: !isDevelopment,
-        ...(isDevelopment ? {
-            sourcemap: "inline",
-        } : {}),
-        ...opts
-    })
+  return Bun.build({
+    entrypoints: [entrypoint],
+    outdir: "dist",
+    target: "browser",
+    minify: !isDevelopment,
+    ...(isDevelopment
+      ? {
+          sourcemap: "inline",
+        }
+      : {}),
+    ...opts,
+  });
 }
 
 await Promise.all([
   buildJs("src/app.ts", { outdir: "dist/src" }),
-  buildJs("src/app-bridge.ts", { outdir: "dist/src", external: ["@modelcontextprotocol/sdk"] }),
-  buildJs("src/react/index.tsx", { outdir: "dist/src/react", external: ["react", "react-dom"]}),
-])
+  buildJs("src/app-bridge.ts", {
+    outdir: "dist/src",
+    external: ["@modelcontextprotocol/sdk"],
+  }),
+  buildJs("src/react/index.tsx", {
+    outdir: "dist/src/react",
+    external: ["react", "react-dom"],
+  }),
+]);

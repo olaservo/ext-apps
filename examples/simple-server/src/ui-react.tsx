@@ -1,3 +1,6 @@
+/**
+ * @file App that demonstrates a few features using React + the Apps SDK.
+ */
 import { useState, useCallback } from "react";
 import { createRoot } from "react-dom/client";
 import {
@@ -13,8 +16,8 @@ import type {
 const APP_INFO: Implementation = {
   name: "MCP UI React Example Client",
   version: "1.0.0",
-  protocolVersion: "2025-06-18",
 };
+
 export function McpClientApp() {
   const [toolResults, setToolResults] = useState<CallToolResult[]>([]);
   const [messages, setMessages] = useState<string[]>([]);

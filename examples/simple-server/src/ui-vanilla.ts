@@ -1,9 +1,18 @@
+/**
+ * @file Demonstrate a few Apps SDK features.
+ *
+ * The vanilla (no React) UI uses the Apps SDK.
+ *
+ * The Apps SDK offers advantages over the Raw UI example,
+ * such as ability to set timeouts, strong runtime type validation
+ * and simpler methods for each request/response interaction.
+ */
 import {
   App,
   PostMessageTransport,
   McpUiToolInputNotificationSchema,
-  McpUiSizeChangeNotificationSchema,
   McpUiToolResultNotificationSchema,
+  McpUiHostContextChangedNotificationSchema,
 } from "@modelcontextprotocol/ext-apps";
 
 window.addEventListener("load", async () => {
@@ -28,6 +37,14 @@ window.addEventListener("load", async () => {
   });
 
   app.setNotificationHandler(
+    McpUiToolInputNotificationSchema,
+    async ({ params }) => {
+      appendText(
+        `Tool call input received: ${JSON.stringify(params.arguments)}`,
+      );
+    },
+  );
+  app.setNotificationHandler(
     McpUiToolResultNotificationSchema,
     async ({ params: { content, structuredContent, isError } }) => {
       appendText(
@@ -36,19 +53,9 @@ window.addEventListener("load", async () => {
     },
   );
   app.setNotificationHandler(
-    McpUiSizeChangeNotificationSchema,
-    async ({ params: { width, height } }) => {
-      appendText(
-        `Size change notification received: width=${width}, height=${height}`,
-      );
-    },
-  );
-  app.setNotificationHandler(
-    McpUiToolInputNotificationSchema,
-    async ({ params }) => {
-      appendText(
-        `Tool call input received: ${JSON.stringify(params.arguments)}`,
-      );
+    McpUiHostContextChangedNotificationSchema,
+    async (params) => {
+      appendText(`Host context changed: ${JSON.stringify(params)}`);
     },
   );
 

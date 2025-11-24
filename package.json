@@ -7,16 +7,16 @@
   "main": "./dist/src/app.js",
   "exports": {
     ".": {
-      "default": "./dist/src/app.js",
-      "types": "./dist/src/app.d.ts"
+      "types": "./dist/src/app.d.ts",
+      "default": "./dist/src/app.js"
     },
     "./react": {
-      "default": "./dist/src/react/index.js",
-      "types": "./dist/src/react/index.d.ts"
+      "types": "./dist/src/react/index.d.ts",
+      "default": "./dist/src/react/index.js"
     },
     "./app-bridge": {
-      "default": "./dist/src/app-bridge.js",
-      "types": "./dist/src/app-bridge.d.ts"
+      "types": "./dist/src/app-bridge.d.ts",
+      "default": "./dist/src/app-bridge.js"
     }
   },
   "files": [
@@ -44,7 +44,7 @@
     "prettier": "^3.6.2"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.20.1",
+    "@modelcontextprotocol/sdk": "^1.22.0",
     "bun": "^1.3.2",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
