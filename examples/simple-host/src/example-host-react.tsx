@@ -1,21 +1,22 @@
+import { useEffect, useState } from "react";
+import { createRoot } from "react-dom/client";
+
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
 import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
-import { useEffect, useState } from "react";
-import { createRoot } from "react-dom/client";
-import { UIActionResult } from "../src/mcp-ui-types.js";
-import { UITemplatedToolCallRenderer } from "../src/react/UITemplatedToolCallRenderer.js";
+import { AppRenderer,AppRendererProps } from "../src/AppRenderer";
+import { AppBridge } from "../../../dist/src/app-bridge";
 
-const SANDBOX_PROXY_URL = URL.parse("/sandbox.html", location.href);
+const SANDBOX_PROXY_URL = URL.parse("/sandbox.html", location.href)!;
 
 /**
- * Example React application demonstrating the UITemplatedToolCallRenderer component.
+ * Example React application demonstrating the AppRenderer component.
  *
  * This shows how to:
  * - Connect to an MCP server
  * - List available tools
- * - Render tool UIs using UITemplatedToolCallRenderer
+ * - Render tool UIs using AppRenderer
  * - Handle UI actions from the tool
  */
 function ExampleApp() {
@@ -93,23 +94,19 @@ function ExampleApp() {
     setActiveTools((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const handleUIAction = async (toolId: string, action: UIActionResult) => {
-    console.log(`[React Host] UI Action from ${toolId}:`, action);
+  const handleMessage: AppRendererProps["onmessage"] = async (params, _extra) => {
+    console.log("[React Host] Message:", params);
+    return {};
+  };
 
-    if (action.type === "intent") {
-      console.log(
-        "[React Host] Intent:",
-        action.payload.intent,
-        action.payload.params,
-      );
-    } else if (action.type === "link") {
-      console.log("[React Host] Opening link:", action.payload.url);
-      window.open(action.payload.url, "_blank", "noopener,noreferrer");
-    } else if (action.type === "prompt") {
-      console.log("[React Host] Prompt:", action.payload.prompt);
-    } else if (action.type === "notify") {
-      console.log("[React Host] Notification:", action.payload.message);
-    }
+  const handleLoggingMessage: AppRendererProps["onloggingmessage"] = (params) => {
+    console.log("[React Host] Logging message:", params);
+  };
+
+  const handleOpenLink: AppRendererProps["onopenlink"] = async (params, _extra) => {
+    console.log("[React Host] Open link request:", params);
+    window.open(params.url, "_blank", "noopener,noreferrer");
+    return { isError: false };
   };
 
   const handleError = (toolId: string, err: Error) => {
@@ -223,13 +220,15 @@ function ExampleApp() {
               </button>
             </div>
 
-            <UITemplatedToolCallRenderer
+            <AppRenderer
               sandboxProxyUrl={SANDBOX_PROXY_URL}
               client={client}
               toolName={tool.name}
               toolInput={tool.input}
-              onUIAction={(action) => handleUIAction(tool.id, action)}
-              onError={(err) => handleError(tool.id, err)}
+              onmessage={handleMessage}
+              onloggingmessage={handleLoggingMessage}
+              onopenlink={handleOpenLink}
+              onerror={(err) => handleError(tool.id, err)}
             />
           </div>
         ))}

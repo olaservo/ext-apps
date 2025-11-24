@@ -17,16 +17,16 @@ import {
   getToolUiResourceUri,
   readToolUiResourceHtml,
   setupSandboxProxyIframe,
-} from "../app-host-utils";
+} from "./app-host-utils";
 
 type RequestExtra = Parameters<
   Parameters<AppBridge["setRequestHandler"]>[1]
 >[1];
 
 /**
- * Props for the UITemplatedToolCallRenderer component.
+ * Props for the AppRenderer component.
  */
-export interface UITemplatedToolCallRendererProps {
+export interface AppRendererProps {
   /** URL to the sandbox proxy HTML that will host the tool UI iframe */
   sandboxProxyUrl: URL;
 
@@ -66,7 +66,7 @@ export interface UITemplatedToolCallRendererProps {
  *
  * @example
  * ```tsx
- * <UITemplatedToolCallRenderer
+ * <AppRenderer
  *   sandboxProxyUrl={new URL('http://localhost:8765/sandbox_proxy.html')}
  *   client={mcpClient}
  *   toolName="create-chart"
@@ -99,8 +99,8 @@ export interface UITemplatedToolCallRendererProps {
  * @param props - Component props
  * @returns React element containing the sandboxed tool UI iframe
  */
-export const UITemplatedToolCallRenderer = (
-  props: UITemplatedToolCallRendererProps,
+export const AppRenderer = (
+  props: AppRendererProps,
 ) => {
   const {
     client,
@@ -224,7 +224,7 @@ export const UITemplatedToolCallRenderer = (
         // Step 5: Store proxy in state
         setAppBridge(appBridge);
       } catch (err) {
-        console.error("[UITemplatedToolCallRenderer] Error:", err);
+        console.error("[AppRenderer] Error:", err);
         if (!mounted) return;
         const error = err instanceof Error ? err : new Error(String(err));
         setError(error);

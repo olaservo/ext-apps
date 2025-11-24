@@ -20,7 +20,7 @@ export const McpUiOpenLinkRequestSchema = RequestSchema.extend({
 export type McpUiOpenLinkRequest = z.infer<typeof McpUiOpenLinkRequestSchema>;
 
 export const McpUiOpenLinkResultSchema = z.object({
-  isError: z.boolean(),
+  isError: z.boolean().optional(),
 });
 export type McpUiOpenLinkResult = z.infer<typeof McpUiOpenLinkResultSchema>;
 
@@ -36,7 +36,7 @@ export type McpUiMessageRequest = z.infer<typeof McpUiMessageRequestSchema>;
 export const McpUiMessageResultSchema = z.object({
   // Note: we don't return the result from follow up messages as they might leak info from the chat.
   // We do tell the caller if it errored, though.
-  isError: z.boolean(),
+  isError: z.boolean().optional(),
 });
 export type McpUiMessageResult = z.infer<typeof McpUiMessageResultSchema>;
 
