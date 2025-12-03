@@ -58,5 +58,12 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "zod": "^3.25"
+  },
+  "optionalDependencies": {
+    "@rollup/rollup-darwin-arm64": "^4.53.3",
+    "@rollup/rollup-darwin-x64": "^4.53.3",
+    "@rollup/rollup-linux-x64-gnu": "^4.53.3",
+    "@rollup/rollup-linux-arm64-gnu": "^4.53.3",
+    "@rollup/rollup-win32-x64-msvc": "^4.53.3"
   }
 }
