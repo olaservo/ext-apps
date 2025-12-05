@@ -20,8 +20,12 @@ const log = {
 
 
 function extractTime(callToolResult: CallToolResult): string {
-  const { time } = (callToolResult.structuredContent as { time?: string }) ?? {};
-  return time ?? "[ERROR]";
+  const text = callToolResult.content!
+    .filter((c): c is { type: "text"; text: string } => c.type === "text")
+    .map((c) => c.text)
+    .join("");
+  const { time } = JSON.parse(text) as { time: string };
+  return time;
 }
 
 

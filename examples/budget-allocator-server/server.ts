@@ -222,30 +222,6 @@ function generateHistory(
 }
 
 // ---------------------------------------------------------------------------
-// Response Formatting
-// ---------------------------------------------------------------------------
-
-function formatBudgetSummary(data: BudgetDataResponse): string {
-  const lines: string[] = [
-    "Budget Allocator Configuration",
-    "==============================",
-    "",
-    `Default Budget: ${data.config.currencySymbol}${data.config.defaultBudget.toLocaleString()}`,
-    `Available Presets: ${data.config.presetBudgets.map((b) => `${data.config.currencySymbol}${b.toLocaleString()}`).join(", ")}`,
-    "",
-    "Categories:",
-    ...data.config.categories.map(
-      (c) => `  - ${c.name}: ${c.defaultPercent}% default`,
-    ),
-    "",
-    `Historical Data: ${data.analytics.history.length} months`,
-    `Benchmark Stages: ${data.analytics.stages.join(", ")}`,
-    `Default Stage: ${data.analytics.defaultStage}`,
-  ];
-  return lines.join("\n");
-}
-
-// ---------------------------------------------------------------------------
 // MCP Server Setup
 // ---------------------------------------------------------------------------
 
@@ -263,7 +239,6 @@ server.registerTool(
     description:
       "Returns budget configuration with 24 months of historical allocations and industry benchmarks by company stage",
     inputSchema: {},
-    outputSchema: BudgetDataResponseSchema.shape,
     _meta: { [RESOURCE_URI_META_KEY]: resourceUri },
   },
   async (): Promise<CallToolResult> => {
@@ -292,10 +267,9 @@ server.registerTool(
       content: [
         {
           type: "text",
-          text: formatBudgetSummary(response),
+          text: JSON.stringify(response),
         },
       ],
-      structuredContent: response,
     };
   },
 );

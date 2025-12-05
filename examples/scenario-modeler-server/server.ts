@@ -61,13 +61,6 @@ const GetScenarioDataInputSchema = z.object({
   ),
 });
 
-const GetScenarioDataOutputSchema = z.object({
-  templates: z.array(ScenarioTemplateSchema),
-  defaultInputs: ScenarioInputsSchema,
-  customProjections: z.array(MonthlyProjectionSchema).optional(),
-  customSummary: ScenarioSummarySchema.optional(),
-});
-
 // Types derived from schemas
 type ScenarioInputs = z.infer<typeof ScenarioInputsSchema>;
 type MonthlyProjection = z.infer<typeof MonthlyProjectionSchema>;
@@ -248,37 +241,6 @@ const DEFAULT_INPUTS: ScenarioInputs = {
 };
 
 // ============================================================================
-// Formatters for text output
-// ============================================================================
-
-function formatCurrency(value: number): string {
-  const absValue = Math.abs(value);
-  const sign = value < 0 ? "-" : "";
-  if (absValue >= 1_000_000) {
-    return `${sign}$${(absValue / 1_000_000).toFixed(2)}M`;
-  }
-  if (absValue >= 1_000) {
-    return `${sign}$${(absValue / 1_000).toFixed(1)}K`;
-  }
-  return `${sign}$${Math.round(absValue)}`;
-}
-
-function formatScenarioSummary(
-  summary: ScenarioSummary,
-  label: string,
-): string {
-  return [
-    `${label}:`,
-    `  Ending MRR: ${formatCurrency(summary.endingMRR)}`,
-    `  ARR: ${formatCurrency(summary.arr)}`,
-    `  Total Revenue: ${formatCurrency(summary.totalRevenue)}`,
-    `  Total Profit: ${formatCurrency(summary.totalProfit)}`,
-    `  MRR Growth: ${summary.mrrGrowthPct.toFixed(1)}%`,
-    `  Break-even: ${summary.breakEvenMonth ? `Month ${summary.breakEvenMonth}` : "Not achieved"}`,
-  ].join("\n");
-}
-
-// ============================================================================
 // MCP Server
 // ============================================================================
 
@@ -298,7 +260,6 @@ const server = new McpServer({
       description:
         "Returns SaaS scenario templates and optionally computes custom projections for given inputs",
       inputSchema: GetScenarioDataInputSchema.shape,
-      outputSchema: GetScenarioDataOutputSchema.shape,
       _meta: { [RESOURCE_URI_META_KEY]: resourceUri },
     },
     async (args: {
@@ -308,28 +269,18 @@ const server = new McpServer({
         ? calculateScenario(args.customInputs)
         : undefined;
 
-      const text = [
-        "SaaS Scenario Modeler",
-        "=".repeat(40),
-        "",
-        "Available Templates:",
-        ...SCENARIO_TEMPLATES.map(
-          (t) => `  ${t.icon} ${t.name}: ${t.description}`,
-        ),
-        "",
-        customScenario
-          ? formatScenarioSummary(customScenario.summary, "Custom Scenario")
-          : "Use customInputs parameter to compute projections for a specific scenario.",
-      ].join("\n");
-
       return {
-        content: [{ type: "text", text }],
-        structuredContent: {
-          templates: SCENARIO_TEMPLATES,
-          defaultInputs: DEFAULT_INPUTS,
-          customProjections: customScenario?.projections,
-          customSummary: customScenario?.summary,
-        },
+        content: [
+          {
+            type: "text",
+            text: JSON.stringify({
+              templates: SCENARIO_TEMPLATES,
+              defaultInputs: DEFAULT_INPUTS,
+              customProjections: customScenario?.projections,
+              customSummary: customScenario?.summary,
+            }),
+          },
+        ],
       };
     },
   );

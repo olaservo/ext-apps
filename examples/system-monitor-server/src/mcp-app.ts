@@ -264,7 +264,13 @@ async function fetchStats(): Promise<void> {
       arguments: {},
     });
 
-    const stats = result.structuredContent as unknown as SystemStats;
+    const text = result
+      .content!.filter(
+        (c): c is { type: "text"; text: string } => c.type === "text",
+      )
+      .map((c) => c.text)
+      .join("");
+    const stats = JSON.parse(text) as SystemStats;
 
     // Initialize chart on first data if needed
     if (!state.chart && stats.cpu.count > 0) {

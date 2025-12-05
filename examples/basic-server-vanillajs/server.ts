@@ -5,7 +5,6 @@ import cors from "cors";
 import express, { type Request, type Response } from "express";
 import fs from "node:fs/promises";
 import path from "node:path";
-import { z } from "zod";
 import { RESOURCE_URI_META_KEY } from "../../dist/src/app";
 
 const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
@@ -30,14 +29,12 @@ const server = new McpServer({
       title: "Get Time",
       description: "Returns the current server time as an ISO 8601 string.",
       inputSchema: {},
-      outputSchema: { time: z.string() },
       _meta: { [RESOURCE_URI_META_KEY]: resourceUri },
     },
     async (): Promise<CallToolResult> => {
       const time = new Date().toISOString();
       return {
-        content: [{ type: "text", text: time }],
-        structuredContent: { time },
+        content: [{ type: "text", text: JSON.stringify({ time }) }],
       };
     },
   );
