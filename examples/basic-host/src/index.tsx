@@ -4,46 +4,23 @@ import { callTool, connectToServer, hasAppHtml, initializeApp, loadSandboxProxy,
 import styles from "./index.module.css";
 
 
-// Available MCP servers - using ports 3101+ to avoid conflicts with common dev ports
-const SERVERS = [
-  { name: "Basic React", port: 3101 },
-  { name: "Vanilla JS", port: 3102 },
-  { name: "Budget Allocator", port: 3103 },
-  { name: "Cohort Heatmap", port: 3104 },
-  { name: "Customer Segmentation", port: 3105 },
-  { name: "Scenario Modeler", port: 3106 },
-  { name: "System Monitor", port: 3107 },
-  { name: "Three.js", port: 3109 },
-] as const;
-
-function serverUrl(port: number): string {
-  return `http://localhost:${port}/mcp`;
-}
-
-// Cache server connections to avoid reconnecting when switching between servers
-const serverInfoCache = new Map<number, Promise<ServerInfo>>();
-
-function getServerInfo(port: number): Promise<ServerInfo> {
-  let promise = serverInfoCache.get(port);
-  if (!promise) {
-    promise = connectToServer(new URL(serverUrl(port)));
-    // Remove from cache on failure so retry is possible
-    promise.catch(() => serverInfoCache.delete(port));
-    serverInfoCache.set(port, promise);
-  }
-  return promise;
-}
-
-
 // Wrapper to track server name with each tool call
 interface ToolCallEntry {
   serverName: string;
   info: ToolCallInfo;
 }
 
-// Host just manages tool call results - no server dependency
-function Host() {
+// Host receives connected servers via promise, uses single use() call
+interface HostProps {
+  serversPromise: Promise<ServerInfo[]>;
+}
+function Host({ serversPromise }: HostProps) {
+  const servers = use(serversPromise);
   const [toolCalls, setToolCalls] = useState<ToolCallEntry[]>([]);
+
+  if (servers.length === 0) {
+    return <p>No servers configured. Set SERVERS environment variable.</p>;
+  }
 
   return (
     <>
@@ -51,6 +28,7 @@ function Host() {
         <ToolCallInfoPanel key={i} serverName={entry.serverName} toolCallInfo={entry.info} />
       ))}
       <CallToolPanel
+        servers={servers}
         addToolCall={(serverName, info) => setToolCalls([...toolCalls, { serverName, info }])}
       />
     </>
@@ -58,60 +36,48 @@ function Host() {
 }
 
 
-// CallToolPanel includes server selection with its own Suspense boundary
+// CallToolPanel manages server selection from already-connected servers
 interface CallToolPanelProps {
+  servers: ServerInfo[];
   addToolCall: (serverName: string, info: ToolCallInfo) => void;
 }
-function CallToolPanel({ addToolCall }: CallToolPanelProps) {
-  const [selectedServer, setSelectedServer] = useState(SERVERS[0]);
-  const [serverInfoPromise, setServerInfoPromise] = useState(
-    () => getServerInfo(selectedServer.port)
-  );
-
-  const handleServerChange = (port: number) => {
-    const server = SERVERS.find(s => s.port === port) ?? SERVERS[0];
-    setSelectedServer(server);
-    setServerInfoPromise(getServerInfo(port));
-  };
+function CallToolPanel({ servers, addToolCall }: CallToolPanelProps) {
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const selectedServer = servers[selectedIndex];
 
   return (
     <div className={styles.callToolPanel}>
       <label>
         Server
         <select
-          value={selectedServer.port}
-          onChange={(e) => handleServerChange(Number(e.target.value))}
+          value={selectedIndex}
+          onChange={(e) => setSelectedIndex(Number(e.target.value))}
         >
-          {SERVERS.map(({ name, port }) => (
-            <option key={port} value={port}>
-              {name} (:{port})
+          {servers.map((server, i) => (
+            <option key={i} value={i}>
+              {server.name}
             </option>
           ))}
         </select>
       </label>
-      <ErrorBoundary>
-        <Suspense fallback={<p className={styles.connecting}>Connecting to {serverUrl(selectedServer.port)}...</p>}>
-          <ToolCallForm
-            key={selectedServer.port}
-            serverName={selectedServer.name}
-            serverInfoPromise={serverInfoPromise}
-            addToolCall={addToolCall}
-          />
-        </Suspense>
-      </ErrorBoundary>
+      <ToolCallForm
+        key={selectedIndex}
+        serverName={selectedServer.name}
+        serverInfo={selectedServer}
+        addToolCall={addToolCall}
+      />
     </div>
   );
 }
 
 
-// ToolCallForm renders inside Suspense - needs serverInfo for tool list
+// ToolCallForm receives already-resolved serverInfo
 interface ToolCallFormProps {
   serverName: string;
-  serverInfoPromise: Promise<ServerInfo>;
+  serverInfo: ServerInfo;
   addToolCall: (serverName: string, info: ToolCallInfo) => void;
 }
-function ToolCallForm({ serverName, serverInfoPromise, addToolCall }: ToolCallFormProps) {
-  const serverInfo = use(serverInfoPromise);
+function ToolCallForm({ serverName, serverInfo, addToolCall }: ToolCallFormProps) {
   const toolNames = Array.from(serverInfo.tools.keys());
   const [selectedTool, setSelectedTool] = useState(toolNames[0] ?? "");
   const [inputJson, setInputJson] = useState("{}");
@@ -264,8 +230,18 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
 }
 
 
+async function connectToAllServers(): Promise<ServerInfo[]> {
+  const serverUrlsResponse = await fetch("/api/servers");
+  const serverUrls = (await serverUrlsResponse.json()) as string[];
+  return Promise.all(serverUrls.map((url) => connectToServer(new URL(url))));
+}
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <Host />
+    <ErrorBoundary>
+      <Suspense fallback={<p className={styles.connecting}>Connecting to servers...</p>}>
+        <Host serversPromise={connectToAllServers()} />
+      </Suspense>
+    </ErrorBoundary>
   </StrictMode>,
 );
