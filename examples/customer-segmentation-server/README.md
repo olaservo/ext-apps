@@ -22,27 +22,21 @@ A demo MCP App that displays customer data as an interactive scatter/bubble char
 
 ## Running
 
-1. Install [Bun](https://github.com/oven-sh/bun) (if not already installed):
-
-   ```bash
-   curl -fsSL https://bun.com/install | bash
-   ```
-
-2. Install dependencies:
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Build and start the server:
+2. Build and start the server:
 
    ```bash
-   npm start
+   npm run start:http  # for Streamable HTTP transport
+   # OR
+   npm run start:stdio  # for stdio transport
    ```
 
-   The server will listen on `http://localhost:3001/mcp`.
-
-4. View using the [`basic-host`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host) example or another MCP Apps-compatible host.
+3. View using the [`basic-host`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host) example or another MCP Apps-compatible host.
 
 ## Architecture
 

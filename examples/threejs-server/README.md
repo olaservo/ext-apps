@@ -1,93 +1,43 @@
-# Three.js MCP Server
+# Example: Three.js App
 
 Interactive 3D scene renderer using Three.js. Demonstrates streaming code preview and full MCP App integration.
 
-![Screenshot](https://modelcontextprotocol.github.io/ext-apps/screenshots/threejs-server/screenshot.png)
+<table>
+  <tr>
+    <td><a href="https://modelcontextprotocol.github.io/ext-apps/screenshots/threejs-server/screenshot.png"><img src="https://modelcontextprotocol.github.io/ext-apps/screenshots/threejs-server/screenshot.png" alt="Three.js scene" width="400"></a></td>
+  </tr>
+</table>
 
-## Tools
+## Features
 
-| Tool                 | Description                          |
-| -------------------- | ------------------------------------ |
-| `show_threejs_scene` | Render 3D scene from JavaScript code |
-| `learn_threejs`      | Get documentation and examples       |
+- **Interactive 3D Rendering**: Execute JavaScript code to create and animate Three.js scenes
+- **Streaming Preview**: See the scene build in real-time as code is being written
+- **Built-in Helpers**: Pre-configured `OrbitControls`, post-processing effects (bloom), and render passes
+- **Documentation Tool**: `learn_threejs` provides API docs and code examples on demand
 
-## Quick Start
+## Running
 
-```bash
-# Build
-npm run build
+1. Install dependencies:
 
-# Run (stdio mode for Claude Desktop)
-bun server.ts --stdio
+   ```bash
+   npm install
+   ```
 
-# Run (HTTP mode for basic-host)
-bun server.ts
-```
+2. Build and start the server:
 
-## Code Structure
+   ```bash
+   npm run start:http  # for Streamable HTTP transport
+   # OR
+   npm run start:stdio  # for stdio transport
+   ```
 
-```
-threejs-server/
-├── server.ts                    # MCP server with tools
-├── mcp-app.html                 # Entry HTML
-└── src/
-    ├── mcp-app-wrapper.tsx      # Generic MCP App wrapper (reusable)
-    ├── threejs-app.tsx          # Three.js widget component
-    └── global.css               # Styles
-```
+3. View using the [`basic-host`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host) example or another MCP Apps-compatible host.
 
-## Key Files
+### Tool Input
 
-### `src/mcp-app-wrapper.tsx`
+To test the example, copy the contents of [`test-input.json`](test-input.json) into the tool input field in `basic-host`.
 
-Generic wrapper handling MCP connection. Provides `WidgetProps` interface:
-
-```tsx
-interface WidgetProps<TToolInput> {
-  toolInputs: TToolInput | null; // Complete tool input
-  toolInputsPartial: TToolInput | null; // Streaming partial input
-  toolResult: CallToolResult | null; // Tool execution result
-  hostContext: McpUiHostContext | null; // Theme, viewport, locale
-  callServerTool: App["callServerTool"]; // Call MCP server tools
-  sendMessage: App["sendMessage"]; // Send chat messages
-  sendOpenLink: App["sendOpenLink"]; // Open URLs in browser
-  sendLog: App["sendLog"]; // Debug logging
-}
-```
-
-### `src/threejs-app.tsx`
-
-Widget component receiving all props. Uses:
-
-- `toolInputs.code` - JavaScript to execute
-- `toolInputsPartial.code` - Streaming preview
-- `toolInputs.height` - Canvas height
-
-### `server.ts`
-
-MCP server with:
-
-- `show_threejs_scene` tool linked to UI resource
-- `learn_threejs` documentation tool
-- stdio + HTTP transport support
-
-## Available Three.js Globals
-
-```javascript
-THREE; // Three.js library
-canvas; // Pre-created canvas
-(width, height); // Canvas dimensions
-OrbitControls; // Camera controls
-EffectComposer; // Post-processing
-RenderPass; // Render pass
-UnrealBloomPass; // Bloom effect
-```
-
-## Test Input
-
-Copy contents of `test-input.json` to test in basic-host (`http://localhost:8080`).
-
-## Example Code
+The test input creates a simple scene with a rotating cube:
 
 ```javascript
 const scene = new THREE.Scene();
@@ -128,10 +78,37 @@ function animate() {
 animate();
 ```
 
-## Creating a New Widget
+#### Available Three.js Globals
 
-1. Copy this example
-2. Rename `threejs-app.tsx` to your widget name
-3. Define your `ToolInput` interface
-4. Implement your widget using the `WidgetProps`
-5. Update `server.ts` with your tools
+When writing custom code, these globals are available:
+
+```javascript
+THREE; // Three.js library
+canvas; // Pre-created canvas element
+width; // Canvas width
+height; // Canvas height
+OrbitControls; // Camera controls
+EffectComposer; // Post-processing composer
+RenderPass; // Render pass
+UnrealBloomPass; // Bloom effect
+```
+
+## Architecture
+
+### Server (`server.ts`)
+
+Exposes two tools:
+
+- `show_threejs_scene` - Renders a 3D scene from JavaScript code
+- `learn_threejs` - Returns documentation and code examples for Three.js APIs
+
+Supports Streamable HTTP and stdio transports.
+
+### App (`src/threejs-app.tsx`)
+
+React component that:
+
+- Receives tool inputs via the MCP App SDK
+- Displays streaming preview from `toolInputsPartial.code` as code arrives
+- Executes final code from `toolInputs.code` when complete
+- Renders to a pre-created canvas with configurable height

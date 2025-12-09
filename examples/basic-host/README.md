@@ -1,6 +1,6 @@
 # Example: Basic Host
 
-A reference implementation showing how to build an MCP Host application that connects to MCP servers and renders tool UIs in a secure sandbox.
+A reference implementation showing how to build an MCP host application that connects to MCP servers and renders tool UIs in a secure sandbox.
 
 This basic host can also be used to test MCP Apps during local development.
 
@@ -14,8 +14,14 @@ This basic host can also be used to test MCP Apps during local development.
 
 ```bash
 npm install
-npm run dev
+npm run start
 # Open http://localhost:8080
+```
+
+By default, the host application will try to connect to an MCP server at `http://localhost:3001/mcp`. You can configure this behavior by setting the `SERVERS` environment variable with a JSON array of server URLs:
+
+```bash
+SERVERS='["http://localhost:1234/mcp", "http://localhost:5678/mcp"]' npm run start
 ```
 
 ## Architecture

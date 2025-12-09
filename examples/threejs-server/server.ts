@@ -14,7 +14,7 @@ import path from "node:path";
 import { z } from "zod";
 import { RESOURCE_URI_META_KEY } from "../../dist/src/app";
 
-const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3109;
+const PORT = process.env.PORT ? parseInt(process.env.PORT, 10) : 3001;
 const DIST_DIR = path.join(import.meta.dirname, "dist");
 
 const THREEJS_DOCUMENTATION = `# Three.js Widget Documentation

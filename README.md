@@ -54,18 +54,22 @@ Your `package.json` will then look like:
 
 ## Examples
 
-- [`examples/basic-server-react`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-react) — Example MCP server with tools that return UI Apps (React)
+Start with these foundational examples to learn the SDK:
+
 - [`examples/basic-server-vanillajs`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-vanillajs) — Example MCP server with tools that return UI Apps (vanilla JS)
+- [`examples/basic-server-react`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-server-react) — Example MCP server with tools that return UI Apps (React)
 - [`examples/basic-host`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host) — Bare-bones example of hosting MCP Apps
 
-To run the examples end-to-end:
+The [`examples/`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples) directory contains additional demo apps showcasing real-world use cases.
+
+To run all examples together:
 
 ```
-npm i
+npm install
 npm run examples:start
 ```
 
-Then open http://localhost:8080/
+Then open http://localhost:8080/.
 
 ## Resources
 
