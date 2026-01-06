@@ -51,10 +51,6 @@ const VIDEO_LIBRARY: Record<string, { url: string; description: string }> = {
     url: "https://test-videos.co.uk/vids/bigbuckbunny/mp4/h264/1080/Big_Buck_Bunny_1080_10s_30MB.mp4",
     description: "30MB",
   },
-  "bunny-50mb": {
-    url: "https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_50mb.mp4",
-    description: "50MB",
-  },
   "bunny-150mb": {
     url: "https://cdn.jsdelivr.net/npm/big-buck-bunny-1080p@0.0.6/video.mp4",
     description: "~150MB (full 1080p)",
@@ -69,7 +65,7 @@ function createServer(): McpServer {
 
   // Register video resource template
   // This fetches video from CDN and returns as base64 blob
-  server.resource(
+  server.registerResource(
     "video",
     new ResourceTemplate("videos://{id}", { list: undefined }),
     {
