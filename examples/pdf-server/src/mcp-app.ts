@@ -13,6 +13,9 @@ import { TextLayer } from "pdfjs-dist";
 import "./global.css";
 import "./mcp-app.css";
 
+// const MAX_MODEL_CONTEXT_LENGTH = 5000;
+const MAX_MODEL_CONTEXT_LENGTH = 1500;
+
 // Configure PDF.js worker
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL(
   "pdfjs-dist/build/pdf.worker.mjs",
@@ -273,7 +276,11 @@ async function updatePageContext() {
     }
 
     // Format content with selection and truncation
-    const content = formatPageContent(pageText, 5000, selection);
+    const content = formatPageContent(
+      pageText,
+      MAX_MODEL_CONTEXT_LENGTH,
+      selection,
+    );
 
     const markdown = `---
 title: ${pdfTitle || ""}
