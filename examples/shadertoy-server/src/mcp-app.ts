@@ -34,6 +34,13 @@ const log = {
 // Get element references
 const mainEl = document.querySelector(".main") as HTMLElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
+const fullscreenBtn = document.getElementById(
+  "fullscreen-btn",
+) as HTMLButtonElement;
+
+// Display mode state
+let currentDisplayMode: "inline" | "fullscreen" = "inline";
+
 // Resize canvas to fill viewport
 function resizeCanvas() {
   canvas.width = window.innerWidth;
@@ -42,15 +49,54 @@ function resizeCanvas() {
 resizeCanvas();
 window.addEventListener("resize", resizeCanvas);
 
-// Handle host context changes (safe area insets)
+// Handle host context changes (display mode)
 function handleHostContextChanged(ctx: McpUiHostContext) {
-  if (ctx.safeAreaInsets) {
-    mainEl.style.paddingTop = `${ctx.safeAreaInsets.top}px`;
-    mainEl.style.paddingRight = `${ctx.safeAreaInsets.right}px`;
-    mainEl.style.paddingBottom = `${ctx.safeAreaInsets.bottom}px`;
-    mainEl.style.paddingLeft = `${ctx.safeAreaInsets.left}px`;
+  // Note: We ignore safeAreaInsets to maximize shader display area
+
+  // Show fullscreen button if available (only update if field is present)
+  if (ctx.availableDisplayModes !== undefined) {
+    if (ctx.availableDisplayModes.includes("fullscreen")) {
+      fullscreenBtn.classList.add("available");
+    } else {
+      fullscreenBtn.classList.remove("available");
+    }
+  }
+
+  // Update display mode state and UI
+  if (ctx.displayMode) {
+    currentDisplayMode = ctx.displayMode as "inline" | "fullscreen";
+    if (currentDisplayMode === "fullscreen") {
+      mainEl.classList.add("fullscreen");
+    } else {
+      mainEl.classList.remove("fullscreen");
+    }
   }
 }
+
+// Handle Escape key to exit fullscreen
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && currentDisplayMode === "fullscreen") {
+    toggleFullscreen();
+  }
+});
+
+// Toggle fullscreen mode
+async function toggleFullscreen() {
+  const newMode = currentDisplayMode === "fullscreen" ? "inline" : "fullscreen";
+  try {
+    const result = await app.requestDisplayMode({ mode: newMode });
+    currentDisplayMode = result.mode as "inline" | "fullscreen";
+    if (currentDisplayMode === "fullscreen") {
+      mainEl.classList.add("fullscreen");
+    } else {
+      mainEl.classList.remove("fullscreen");
+    }
+  } catch (err) {
+    log.error("Failed to change display mode:", err);
+  }
+}
+
+fullscreenBtn.addEventListener("click", toggleFullscreen);
 
 // ShaderToyLite instance
 let shaderToy: ShaderToyLiteInstance | null = null;
