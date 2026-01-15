@@ -51,6 +51,8 @@ let animationFrame: number | null = null;
 
 // Speech Recognition
 let recognition: SpeechRecognition | null = null;
+let committedResultCount = 0; // How many results have been committed as entries
+let interimTranscript = ""; // Current interim (unstable) text
 
 // ============================================================================
 // MCP App Setup
@@ -155,21 +157,43 @@ function startSpeechRecognition(): boolean {
 
   recognition.onstart = () => {
     log.info("Speech recognition started");
+    committedResultCount = 0;
+    interimTranscript = "";
   };
 
   recognition.onresult = (event) => {
     const e = event as SpeechRecognitionEvent;
-    for (let i = e.resultIndex; i < e.results.length; i++) {
+
+    // Process results, committing newly-finalized ones
+    interimTranscript = "";
+
+    for (let i = 0; i < e.results.length; i++) {
       const result = e.results[i];
       const transcript = result[0].transcript;
 
       if (result.isFinal) {
-        addTranscriptEntry(transcript, true);
-        updateSendButton();
-        updateModelContext();
+        // Only commit if this result hasn't been committed yet
+        if (i >= committedResultCount) {
+          const text = transcript.trim();
+          if (text) {
+            clearInterimTranscript();
+            addTranscriptEntry(text, true);
+            updateSendButton();
+            updateModelContext();
+          }
+          committedResultCount = i + 1;
+        }
       } else {
-        updateInterimTranscript(transcript);
+        // Accumulate all interim text
+        interimTranscript += transcript;
       }
+    }
+
+    // Show interim text if any
+    if (interimTranscript.trim()) {
+      updateInterimTranscript("", interimTranscript);
+    } else {
+      clearInterimTranscript();
     }
   };
 
@@ -204,6 +228,9 @@ function startSpeechRecognition(): boolean {
 }
 
 function stopSpeechRecognition() {
+  // Commit any accumulated final transcript before stopping
+  commitFinalTranscript();
+
   if (recognition) {
     try {
       recognition.stop();
@@ -212,6 +239,19 @@ function stopSpeechRecognition() {
     }
     recognition = null;
   }
+}
+
+function commitFinalTranscript() {
+  // Commit any remaining interim text when stopping
+  const textToCommit = interimTranscript.trim();
+  if (textToCommit) {
+    clearInterimTranscript();
+    addTranscriptEntry(textToCommit, true);
+    updateSendButton();
+    updateModelContext();
+  }
+  committedResultCount = 0;
+  interimTranscript = "";
 }
 
 // ============================================================================
@@ -271,7 +311,7 @@ function addTranscriptEntry(text: string, isFinal: boolean) {
   transcriptEl.appendChild(entry);
 }
 
-function updateInterimTranscript(text: string) {
+function updateInterimTranscript(finalText: string, interimText: string) {
   clearTranscriptPlaceholder();
 
   let interim = transcriptEl.querySelector(
@@ -284,7 +324,21 @@ function updateInterimTranscript(text: string) {
   }
 
   const timestamp = new Date().toLocaleTimeString();
-  interim.innerHTML = `<div class="timestamp">${timestamp}</div>${escapeHtml(text)}`;
+
+  // Show final text (stable) in normal style, interim text (unstable) in delta style
+  const finalHtml = escapeHtml(finalText);
+  const interimHtml = interimText
+    ? `<span class="interim-delta">${escapeHtml(interimText)}</span>`
+    : "";
+
+  interim.innerHTML = `<div class="timestamp">${timestamp}</div>${finalHtml}${interimHtml}`;
+}
+
+function clearInterimTranscript() {
+  const interim = transcriptEl.querySelector(".transcript-entry.interim");
+  if (interim) {
+    interim.remove();
+  }
 }
 
 function escapeHtml(text: string): string {

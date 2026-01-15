@@ -66,9 +66,14 @@
 }
 
 .transcript-entry.interim {
-  opacity: 0.6;
-  font-style: italic;
   border-left: 3px solid var(--color-primary);
+  font-style: normal;
+}
+
+/* Unstable/interim text within entry - dimmed and italic */
+.transcript-entry.interim .interim-delta {
+  opacity: 0.5;
+  font-style: italic;
 }
 
 .transcript-entry.sent {
