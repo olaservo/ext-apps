@@ -674,6 +674,9 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    * @example Update with structured content
    * {@includeCode ./app.examples.ts#App_updateModelContext_structuredContent}
    *
+   * @example Report runtime error to model
+   * {@includeCode ./app.examples.ts#App_updateModelContext_reportError}
+   *
    * @returns Promise that resolves when the context update is acknowledged
    */
   updateModelContext(

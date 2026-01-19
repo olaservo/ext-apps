@@ -28,17 +28,6 @@ function authenticatedCalls(app: App) {
 }
 
 /**
- * Example: Giving errors back to model
- */
-function errorsToModel(app: App) {
-  //#region errorsToModel
-  // Before app runs: validate inputs in tool call
-  // After it runs: updateModelContext
-  // TODO: Complete implementation
-  //#endregion errorsToModel
-}
-
-/**
  * Example: Unified host styling (theme, CSS variables, fonts)
  */
 function hostStylingVanillaJs(app: App) {
@@ -132,7 +121,6 @@ function migrateFromOpenai() {
 
 // Suppress unused variable warnings
 void authenticatedCalls;
-void errorsToModel;
 void hostStylingVanillaJs;
 void hostStylingReact;
 void persistData;

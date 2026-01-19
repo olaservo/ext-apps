@@ -365,6 +365,28 @@ async function App_updateModelContext_structuredContent(app: App) {
 }
 
 /**
+ * Example: Report runtime error to model.
+ */
+async function App_updateModelContext_reportError(app: App) {
+  //#region App_updateModelContext_reportError
+  try {
+    const _stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    // ... use _stream for transcription
+  } catch (err) {
+    // Inform the model that the app is in a degraded state
+    await app.updateModelContext({
+      content: [
+        {
+          type: "text",
+          text: "Error: transcription unavailable",
+        },
+      ],
+    });
+  }
+  //#endregion App_updateModelContext_reportError
+}
+
+/**
  * Example: Open documentation link.
  */
 async function App_openLink_documentation(app: App) {

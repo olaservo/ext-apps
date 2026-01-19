@@ -20,12 +20,13 @@ Set {@link types!McpUiToolMeta.visibility Tool.\_meta.ui.visibility} to `["app"]
 
 {@includeCode ./patterns.tsx#authenticatedCalls}
 
-## [TODO] Giving errors back to model
+## Giving errors back to model
 
-- Before app runs: validate inputs in tool call
-- After it runs: use `updateModelContext`
+**Server-side**: Tool handler validates inputs and returns `{ isError: true, content: [...] }`. The model receives this error through the normal tool call response.
 
-{@includeCode ./patterns.tsx#errorsToModel}
+**Client-side**: If a runtime error occurs (e.g., API failure, permission denied, resource unavailable), use {@link app!App.updateModelContext updateModelContext} to inform the model:
+
+{@includeCode ../src/app.examples.ts#App_updateModelContext_reportError}
 
 ## Matching host styling (CSS variables, theme, and fonts)
 
