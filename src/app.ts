@@ -60,14 +60,16 @@ export {
 } from "./styles";
 
 /**
- * Metadata key for associating a resource URI with a tool call.
+ * Metadata key for associating a UI resource URI with a tool.
  *
- * MCP servers include this key in tool call result metadata to indicate which
- * UI resource should be displayed for the tool. When hosts receive a tool result
- * containing this metadata, they resolve and render the corresponding {@link App}.
+ * MCP servers include this key in tool definition metadata (via `tools/list`)
+ * to indicate which UI resource should be displayed when the tool is called.
+ * When hosts see a tool with this metadata, they fetch and render the
+ * corresponding {@link App}.
  *
- * **Note**: This constant is provided for reference. MCP servers set this metadata
- * in their tool handlers; App developers typically don't need to use it directly.
+ * **Note**: This constant is provided for reference. App developers typically
+ * don't need to use it directly. Prefer using {@link server-helpers!registerAppTool}
+ * with the `_meta.ui.resourceUri` format instead.
  *
  * @example How MCP servers use this key (server-side, not in Apps)
  * {@includeCode ./app.examples.ts#RESOURCE_URI_META_KEY_serverSide}
@@ -200,7 +202,7 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    * @returns Host capabilities, or `undefined` if not yet connected
    *
    * @example Check host capabilities after connection
-   * {@includeCode ./app.examples.ts#App_hostCapabilities_checkAfterConnection}
+   * {@includeCode ./app.examples.ts#App_getHostCapabilities_checkAfterConnection}
    *
    * @see {@link connect} for the initialization handshake
    * @see {@link McpUiHostCapabilities} for the capabilities structure
@@ -219,7 +221,7 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    * @returns Host implementation info, or `undefined` if not yet connected
    *
    * @example Log host information after connection
-   * {@includeCode ./app.examples.ts#App_hostInfo_logAfterConnection}
+   * {@includeCode ./app.examples.ts#App_getHostVersion_logAfterConnection}
    *
    * @see {@link connect} for the initialization handshake
    */
@@ -240,7 +242,7 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    * @returns Host context, or `undefined` if not yet connected
    *
    * @example Access host context after connection
-   * {@includeCode ./app.examples.ts#App_hostContext_accessAfterConnection}
+   * {@includeCode ./app.examples.ts#App_getHostContext_accessAfterConnection}
    *
    * @see {@link connect} for the initialization handshake
    * @see {@link onhostcontextchanged} for context change notifications
@@ -264,11 +266,8 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    *
    * @param callback - Function called with the tool input params ({@link McpUiToolInputNotification.params})
    *
-   * @example Using the setter (simpler)
+   * @example
    * {@includeCode ./app.examples.ts#App_ontoolinput_setter}
-   *
-   * @example Using setNotificationHandler (more explicit)
-   * {@includeCode ./app.examples.ts#App_ontoolinput_setNotificationHandler}
    *
    * @see {@link setNotificationHandler} for the underlying method
    * @see {@link McpUiToolInputNotification} for the notification structure
@@ -607,9 +606,9 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    *
    * @param params - Message role and content
    * @param options - Request options (timeout, etc.)
-   * @returns Result indicating success or error (no message content returned)
+   * @returns Result with optional `isError` flag indicating host rejection
    *
-   * @throws {Error} If the host rejects the message
+   * @throws {Error} If the request times out or the connection is lost
    *
    * @example Send a text message from user interaction
    * {@includeCode ./app.examples.ts#App_sendMessage_textFromInteraction}
@@ -662,6 +661,7 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    * @param options - Request options (timeout, etc.)
    *
    * @throws {Error} If the host rejects the context update (e.g., unsupported content type)
+   * @throws {Error} If the request times out or the connection is lost
    *
    * @example Update model context with current app state
    * {@includeCode ./app.examples.ts#App_updateModelContext_appState}
@@ -689,19 +689,19 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    * Request the host to open an external URL in the default browser.
    *
    * The host may deny this request based on user preferences or security policy.
-   * Apps should handle rejection gracefully.
+   * Apps should handle rejection gracefully by checking `result.isError`.
    *
    * @param params - URL to open
    * @param options - Request options (timeout, etc.)
-   * @returns Result indicating success or error
+   * @returns Result with `isError: true` if the host denied the request (e.g., blocked domain, user cancelled)
    *
-   * @throws {Error} If the host denies the request (e.g., blocked domain, user cancelled)
    * @throws {Error} If the request times out or the connection is lost
    *
    * @example Open documentation link
    * {@includeCode ./app.examples.ts#App_openLink_documentation}
    *
    * @see {@link McpUiOpenLinkRequest} for request structure
+   * @see {@link McpUiOpenLinkResult} for result structure
    */
   openLink(params: McpUiOpenLinkRequest["params"], options?: RequestOptions) {
     return this.request(

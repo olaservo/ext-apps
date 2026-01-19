@@ -91,9 +91,6 @@ export function useHostStyleVariables(
  * @example Basic usage with useApp
  * {@includeCode ./useHostStyles.examples.tsx#useHostFonts_basicUsage}
  *
- * @example With initial context
- * {@includeCode ./useHostStyles.examples.tsx#useHostFonts_withInitialContext}
- *
  * @see {@link applyHostFonts} for the underlying fonts function
  * @see {@link useHostStyleVariables} for applying style variables and theme
  */

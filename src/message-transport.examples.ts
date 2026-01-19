@@ -49,7 +49,7 @@ function PostMessageTransport_constructor_guestUI() {
  */
 function PostMessageTransport_constructor_host() {
   //#region PostMessageTransport_constructor_host
-  const iframe = document.getElementById("app") as HTMLIFrameElement;
+  const iframe = document.getElementById("app-iframe") as HTMLIFrameElement;
   const transport = new PostMessageTransport(
     iframe.contentWindow!,
     iframe.contentWindow!,

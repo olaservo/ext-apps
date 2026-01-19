@@ -29,7 +29,7 @@ export interface UseAppOptions {
    *
    * @param app - The newly created `App` instance
    *
-   * @example Register a notification handler
+   * @example Register an event handler
    * {@includeCode ./useApp.examples.tsx#useApp_registerHandler}
    */
   onAppCreated?: (app: App) => void;
@@ -69,7 +69,7 @@ export interface AppState {
  *   initialization, the `error` field will contain the error (typically connection
  *   timeouts, initialization handshake failures, or transport errors).
  *
- * @example Basic usage
+ * @example Basic usage of useApp hook with common event handlers
  * {@includeCode ./useApp.examples.tsx#useApp_basicUsage}
  *
  * @see {@link App.connect} for the underlying connection method

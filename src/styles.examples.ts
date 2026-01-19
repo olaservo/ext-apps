@@ -7,7 +7,6 @@
  * @module
  */
 
-import type { McpUiHostContext } from "./types.js";
 import { App } from "./app.js";
 import {
   getDocumentTheme,
@@ -16,24 +15,20 @@ import {
   applyHostFonts,
 } from "./styles.js";
 
-// Stub declarations for examples
-declare const app: App;
-declare const hostContext: McpUiHostContext;
-
 /**
  * Example: Check current theme.
  */
 function getDocumentTheme_checkCurrent() {
   //#region getDocumentTheme_checkCurrent
   const theme = getDocumentTheme();
-  console.log(`Current theme: ${theme}`);
+  const isDark = theme === "dark";
   //#endregion getDocumentTheme_checkCurrent
 }
 
 /**
  * Example: Apply theme from host context.
  */
-function applyDocumentTheme_fromHostContext() {
+function applyDocumentTheme_fromHostContext(app: App) {
   //#region applyDocumentTheme_fromHostContext
   app.onhostcontextchanged = (params) => {
     if (params.theme) {
@@ -46,7 +41,7 @@ function applyDocumentTheme_fromHostContext() {
 /**
  * Example: Apply style variables from host context.
  */
-function applyHostStyleVariables_fromHostContext() {
+function applyHostStyleVariables_fromHostContext(app: App) {
   //#region applyHostStyleVariables_fromHostContext
   app.onhostcontextchanged = (params) => {
     if (params.styles?.variables) {
@@ -59,19 +54,21 @@ function applyHostStyleVariables_fromHostContext() {
 /**
  * Example: Apply to a specific element.
  */
-function applyHostStyleVariables_toElement() {
+function applyHostStyleVariables_toElement(app: App) {
   //#region applyHostStyleVariables_toElement
-  const container = document.getElementById("app-root");
-  if (container && hostContext.styles?.variables) {
-    applyHostStyleVariables(hostContext.styles.variables, container);
-  }
+  app.onhostcontextchanged = (params) => {
+    const container = document.getElementById("app-root");
+    if (container && params.styles?.variables) {
+      applyHostStyleVariables(params.styles.variables, container);
+    }
+  };
   //#endregion applyHostStyleVariables_toElement
 }
 
 /**
  * Example: Apply fonts from host context.
  */
-function applyHostFonts_fromHostContext() {
+function applyHostFonts_fromHostContext(app: App) {
   //#region applyHostFonts_fromHostContext
   app.onhostcontextchanged = (params) => {
     if (params.styles?.css?.fonts) {

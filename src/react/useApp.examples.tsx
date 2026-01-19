@@ -4,10 +4,12 @@
  * @module
  */
 
-import { useApp, McpUiToolInputNotificationSchema } from "./index.js";
+import { useState } from "react";
+import type { McpUiHostContext } from "../types.js";
+import { useApp } from "./index.js";
 
 /**
- * Example: Register a notification handler in onAppCreated.
+ * Example: Register an event handler in onAppCreated.
  */
 function useApp_registerHandler() {
   //#region useApp_registerHandler
@@ -15,40 +17,49 @@ function useApp_registerHandler() {
     appInfo: { name: "MyApp", version: "1.0.0" },
     capabilities: {},
     onAppCreated: (app) => {
-      app.setNotificationHandler(
-        McpUiToolInputNotificationSchema,
-        (notification) => {
-          console.log("Tool input:", notification.params.arguments);
-        },
-      );
+      app.ontoolresult = (result) => {
+        console.log("Tool result:", result);
+      };
     },
   });
   //#endregion useApp_registerHandler
 }
 
 /**
- * Example: Basic usage of useApp hook.
+ * Example: Basic usage of useApp hook with common event handlers.
  */
 function useApp_basicUsage() {
   //#region useApp_basicUsage
   function MyApp() {
+    const [hostContext, setHostContext] = useState<
+      McpUiHostContext | undefined
+    >(undefined);
+
     const { app, isConnected, error } = useApp({
       appInfo: { name: "MyApp", version: "1.0.0" },
       capabilities: {},
       onAppCreated: (app) => {
-        // Register handlers before connection
-        app.setNotificationHandler(
-          McpUiToolInputNotificationSchema,
-          (notification) => {
-            console.log("Tool input:", notification.params.arguments);
-          },
-        );
+        app.ontoolinput = (input) => {
+          console.log("Tool input:", input);
+        };
+        app.ontoolresult = (result) => {
+          console.log("Tool result:", result);
+        };
+        app.ontoolcancelled = (params) => {
+          console.log("Tool cancelled:", params.reason);
+        };
+        app.onerror = (error) => {
+          console.log("Error:", error);
+        };
+        app.onhostcontextchanged = (params) => {
+          setHostContext((prev) => ({ ...prev, ...params }));
+        };
       },
     });
 
     if (error) return <div>Error: {error.message}</div>;
     if (!isConnected) return <div>Connecting...</div>;
-    return <div>Connected!</div>;
+    return <div>Theme: {hostContext?.theme}</div>;
   }
   //#endregion useApp_basicUsage
 }

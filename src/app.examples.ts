@@ -7,43 +7,43 @@
  * @module
  */
 
-import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
-import {
-  App,
-  PostMessageTransport,
-  McpUiToolInputNotificationSchema,
-  RESOURCE_URI_META_KEY,
-} from "./app.js";
+import type { Tool } from "@modelcontextprotocol/sdk/types.js";
+import type {
+  McpServer,
+  ToolCallback,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
+import { App, PostMessageTransport, RESOURCE_URI_META_KEY } from "./app.js";
 
 /**
  * Example: How MCP servers use RESOURCE_URI_META_KEY (server-side, not in Apps).
  */
-function RESOURCE_URI_META_KEY_serverSide(): CallToolResult {
+function RESOURCE_URI_META_KEY_serverSide(
+  server: McpServer,
+  handler: ToolCallback,
+) {
   //#region RESOURCE_URI_META_KEY_serverSide
-  // In an MCP server's tool handler:
-  return {
-    content: [{ type: "text", text: "Result" }],
-    _meta: {
-      [RESOURCE_URI_META_KEY]: "ui://weather/forecast",
+  server.registerTool(
+    "weather",
+    {
+      description: "Get weather forecast",
+      _meta: {
+        [RESOURCE_URI_META_KEY]: "ui://weather/forecast",
+      },
     },
-  };
+    handler,
+  );
   //#endregion RESOURCE_URI_META_KEY_serverSide
 }
 
 /**
  * Example: How hosts check for RESOURCE_URI_META_KEY metadata (host-side).
  */
-async function RESOURCE_URI_META_KEY_hostSide(mcpClient: {
-  callTool: (args: {
-    name: string;
-    arguments: object;
-  }) => Promise<CallToolResult>;
-}) {
+function RESOURCE_URI_META_KEY_hostSide(tool: Tool) {
   //#region RESOURCE_URI_META_KEY_hostSide
-  const result = await mcpClient.callTool({ name: "weather", arguments: {} });
-  const uiUri = result._meta?.[RESOURCE_URI_META_KEY];
-  if (uiUri) {
-    // Load and display the UI resource
+  // Check tool definition metadata (from tools/list response):
+  const uiUri = tool._meta?.[RESOURCE_URI_META_KEY];
+  if (typeof uiUri === "string" && uiUri.startsWith("ui://")) {
+    // Fetch the resource and display the UI
   }
   //#endregion RESOURCE_URI_META_KEY_hostSide
 }
@@ -72,20 +72,12 @@ async function App_basicUsage() {
     {}, // capabilities
   );
 
-  // Register notification handler using setter (simpler)
+  // Register handlers before connecting to ensure no notifications are missed
   app.ontoolinput = (params) => {
     console.log("Tool arguments:", params.arguments);
   };
 
-  // OR using inherited setNotificationHandler (more explicit)
-  app.setNotificationHandler(
-    McpUiToolInputNotificationSchema,
-    (notification) => {
-      console.log("Tool arguments:", notification.params.arguments);
-    },
-  );
-
-  await app.connect(new PostMessageTransport(window.parent, window.parent));
+  await app.connect();
   //#endregion App_basicUsage
 }
 
@@ -104,93 +96,60 @@ async function App_sendMessage(app: App) {
 /**
  * Example: Check host capabilities after connection.
  */
-async function App_hostCapabilities_checkAfterConnection(
-  app: App,
-  transport: PostMessageTransport,
-) {
-  //#region App_hostCapabilities_checkAfterConnection
-  await app.connect(transport);
-  const caps = app.getHostCapabilities();
-  if (caps === undefined) {
-    console.error("Not connected");
-    return;
-  }
-  if (caps.serverTools) {
+async function App_getHostCapabilities_checkAfterConnection(app: App) {
+  //#region App_getHostCapabilities_checkAfterConnection
+  await app.connect();
+  if (app.getHostCapabilities()?.serverTools) {
     console.log("Host supports server tool calls");
   }
-  //#endregion App_hostCapabilities_checkAfterConnection
+  //#endregion App_getHostCapabilities_checkAfterConnection
 }
 
 /**
  * Example: Log host information after connection.
  */
-async function App_hostInfo_logAfterConnection(
+async function App_getHostVersion_logAfterConnection(
   app: App,
   transport: PostMessageTransport,
 ) {
-  //#region App_hostInfo_logAfterConnection
+  //#region App_getHostVersion_logAfterConnection
   await app.connect(transport);
-  const host = app.getHostVersion();
-  if (host === undefined) {
-    console.error("Not connected");
-    return;
-  }
-  console.log(`Connected to ${host.name} v${host.version}`);
-  //#endregion App_hostInfo_logAfterConnection
+  const { name, version } = app.getHostVersion() ?? {};
+  console.log(`Connected to ${name} v${version}`);
+  //#endregion App_getHostVersion_logAfterConnection
 }
 
 /**
  * Example: Access host context after connection.
  */
-async function App_hostContext_accessAfterConnection(
+async function App_getHostContext_accessAfterConnection(
   app: App,
   transport: PostMessageTransport,
 ) {
-  //#region App_hostContext_accessAfterConnection
+  //#region App_getHostContext_accessAfterConnection
   await app.connect(transport);
   const context = app.getHostContext();
-  if (context === undefined) {
-    console.error("Not connected");
-    return;
-  }
-  if (context.theme === "dark") {
+  if (context?.theme === "dark") {
     document.body.classList.add("dark-theme");
   }
-  if (context.toolInfo) {
+  if (context?.toolInfo) {
     console.log("Tool:", context.toolInfo.tool.name);
   }
-  //#endregion App_hostContext_accessAfterConnection
+  //#endregion App_getHostContext_accessAfterConnection
 }
 
 /**
  * Example: Using the ontoolinput setter (simpler approach).
  */
-async function App_ontoolinput_setter(
-  app: App,
-  transport: PostMessageTransport,
-) {
+async function App_ontoolinput_setter(app: App) {
   //#region App_ontoolinput_setter
   // Register before connecting to ensure no notifications are missed
   app.ontoolinput = (params) => {
     console.log("Tool:", params.arguments);
     // Update your UI with the tool arguments
   };
-  await app.connect(transport);
+  await app.connect();
   //#endregion App_ontoolinput_setter
-}
-
-/**
- * Example: Using setNotificationHandler for tool input (more explicit approach).
- */
-function App_ontoolinput_setNotificationHandler(app: App) {
-  //#region App_ontoolinput_setNotificationHandler
-  app.setNotificationHandler(
-    McpUiToolInputNotificationSchema,
-    (notification) => {
-      console.log("Tool:", notification.params.arguments);
-    },
-  );
-  //#endregion App_ontoolinput_setNotificationHandler
 }
 
 /**
@@ -211,11 +170,10 @@ function App_ontoolinputpartial_progressiveRendering(app: App) {
 function App_ontoolresult_displayResults(app: App) {
   //#region App_ontoolresult_displayResults
   app.ontoolresult = (params) => {
-    if (params.content) {
-      console.log("Tool output:", params.content);
-    }
     if (params.isError) {
-      console.error("Tool execution failed");
+      console.error("Tool execution failed:", params.content);
+    } else if (params.content) {
+      console.log("Tool output:", params.content);
     }
   };
   //#endregion App_ontoolresult_displayResults
@@ -228,13 +186,10 @@ function App_ontoolcancelled_handleCancellation(app: App) {
   //#region App_ontoolcancelled_handleCancellation
   app.ontoolcancelled = (params) => {
     console.log("Tool cancelled:", params.reason);
-    showCancelledMessage(params.reason ?? "Operation was cancelled");
+    // Update your UI to show cancellation state
   };
   //#endregion App_ontoolcancelled_handleCancellation
 }
-
-// Stub for example
-declare function showCancelledMessage(message: string): void;
 
 /**
  * Example: Respond to theme changes using onhostcontextchanged.
@@ -291,7 +246,7 @@ function App_onlisttools_returnTools(app: App) {
   //#region App_onlisttools_returnTools
   app.onlisttools = async (params, extra) => {
     return {
-      tools: ["calculate", "convert", "format"],
+      tools: ["greet", "calculate", "format"],
     };
   };
   //#endregion App_onlisttools_returnTools
@@ -324,13 +279,17 @@ async function App_callServerTool_fetchWeather(app: App) {
 async function App_sendMessage_textFromInteraction(app: App) {
   //#region App_sendMessage_textFromInteraction
   try {
-    await app.sendMessage({
+    const result = await app.sendMessage({
       role: "user",
       content: [{ type: "text", text: "Show me details for item #42" }],
     });
+    if (result.isError) {
+      console.error("Host rejected the message");
+      // Handle rejection appropriately for your app
+    }
   } catch (error) {
     console.error("Failed to send message:", error);
-    // Handle error appropriately for your app
+    // Handle transport/protocol error
   }
   //#endregion App_sendMessage_textFromInteraction
 }
@@ -375,11 +334,11 @@ async function App_updateModelContext_structuredContent(app: App) {
  */
 async function App_openLink_documentation(app: App) {
   //#region App_openLink_documentation
-  try {
-    await app.openLink({ url: "https://docs.example.com" });
-  } catch (error) {
-    console.error("Failed to open link:", error);
+  const { isError } = await app.openLink({ url: "https://docs.example.com" });
+  if (isError) {
+    // Host denied the request (e.g., blocked domain, user cancelled)
     // Optionally show fallback: display URL for manual copy
+    console.warn("Link request denied");
   }
   //#endregion App_openLink_documentation
 }

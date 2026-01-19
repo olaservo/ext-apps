@@ -7,7 +7,12 @@
  * @module
  */
 
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import * as fs from "node:fs/promises";
+import type {
+  McpServer,
+  ToolCallback,
+  ReadResourceCallback,
+} from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import {
   registerAppTool,
@@ -24,17 +29,14 @@ declare function updateCartItem(
   itemId: string,
   quantity: number,
 ): Promise<{ items: unknown[]; total: number }>;
-declare const fs: { readFile(path: string, encoding: string): Promise<string> };
-declare function readCallback(): Promise<{
-  contents: { uri: string; mimeType: string; text: string }[];
-}>;
 
 /**
  * Example: Module overview showing basic registration of tools and resources.
  */
 function index_overview(
   server: McpServer,
-  handler: () => Promise<{ content: { type: "text"; text: string }[] }>,
+  toolCallback: ToolCallback,
+  readCallback: ReadResourceCallback,
 ) {
   //#region index_overview
   // Register a tool that displays a widget
@@ -45,7 +47,7 @@ function index_overview(
       description: "Get weather forecast",
       _meta: { ui: { resourceUri: "ui://weather/widget.html" } },
     },
-    handler,
+    toolCallback,
   );
 
   // Register the HTML resource the tool references
@@ -175,12 +177,11 @@ function registerAppResource_withCsp(
           uri: "ui://music/player.html",
           mimeType: RESOURCE_MIME_TYPE,
           text: musicPlayerHtml,
-          // CSP must be on the content item, not the resource config
           _meta: {
             ui: {
               csp: {
-                connectDomains: ["https://api.example.com"], // For fetch/WebSocket
                 resourceDomains: ["https://cdn.example.com"], // For scripts/styles/images
+                connectDomains: ["https://api.example.com"], // For fetch/WebSocket
               },
             },
           },

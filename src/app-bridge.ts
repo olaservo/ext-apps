@@ -280,7 +280,7 @@ export class AppBridge extends Protocol<
    * @returns Guest UI capabilities, or `undefined` if not yet initialized
    *
    * @example Check Guest UI capabilities after initialization
-   * {@includeCode ./app-bridge.examples.ts#AppBridge_guestCapabilities_checkAfterInit}
+   * {@includeCode ./app-bridge.examples.ts#AppBridge_getAppCapabilities_checkAfterInit}
    *
    * @see {@link McpUiAppCapabilities} for the capabilities structure
    */
@@ -297,7 +297,7 @@ export class AppBridge extends Protocol<
    * @returns Guest UI implementation info, or `undefined` if not yet initialized
    *
    * @example Log Guest UI information after initialization
-   * {@includeCode ./app-bridge.examples.ts#AppBridge_guestInfo_logAfterInit}
+   * {@includeCode ./app-bridge.examples.ts#AppBridge_getAppVersion_logAfterInit}
    */
   getAppVersion(): Implementation | undefined {
     return this._appInfo;

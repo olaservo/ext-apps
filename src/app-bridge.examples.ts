@@ -17,6 +17,7 @@ import {
   ListPromptsResultSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { AppBridge, PostMessageTransport } from "./app-bridge.js";
+import type { McpUiDisplayMode } from "./types.js";
 
 /**
  * Example: Basic usage of the AppBridge class with PostMessageTransport.
@@ -65,7 +66,6 @@ function AppBridge_constructor_withMcpClient(mcpClient: Client) {
     { openLinks: {}, serverTools: {}, logging: {} },
   );
   //#endregion AppBridge_constructor_withMcpClient
-  return bridge;
 }
 
 /**
@@ -83,42 +83,43 @@ function AppBridge_constructor_withoutMcpClient() {
     return { content: [] };
   };
   //#endregion AppBridge_constructor_withoutMcpClient
-  return bridge;
 }
 
 /**
  * Example: Check Guest UI capabilities after initialization.
  */
-function AppBridge_guestCapabilities_checkAfterInit(bridge: AppBridge) {
-  //#region AppBridge_guestCapabilities_checkAfterInit
+function AppBridge_getAppCapabilities_checkAfterInit(bridge: AppBridge) {
+  //#region AppBridge_getAppCapabilities_checkAfterInit
   bridge.oninitialized = () => {
     const caps = bridge.getAppCapabilities();
     if (caps?.tools) {
       console.log("Guest UI provides tools");
     }
   };
-  //#endregion AppBridge_guestCapabilities_checkAfterInit
+  //#endregion AppBridge_getAppCapabilities_checkAfterInit
 }
 
 /**
  * Example: Log Guest UI information after initialization.
  */
-function AppBridge_guestInfo_logAfterInit(bridge: AppBridge) {
-  //#region AppBridge_guestInfo_logAfterInit
+function AppBridge_getAppVersion_logAfterInit(bridge: AppBridge) {
+  //#region AppBridge_getAppVersion_logAfterInit
   bridge.oninitialized = () => {
     const appInfo = bridge.getAppVersion();
     if (appInfo) {
       console.log(`Guest UI: ${appInfo.name} v${appInfo.version}`);
     }
   };
-  //#endregion AppBridge_guestInfo_logAfterInit
+  //#endregion AppBridge_getAppVersion_logAfterInit
 }
 
 /**
  * Example: Handle Guest UI initialization and send tool input.
  */
-function AppBridge_oninitialized_sendToolInput(bridge: AppBridge) {
-  const toolArgs = { location: "NYC" };
+function AppBridge_oninitialized_sendToolInput(
+  bridge: AppBridge,
+  toolArgs: Record<string, unknown>,
+) {
   //#region AppBridge_oninitialized_sendToolInput
   bridge.oninitialized = () => {
     console.log("Guest UI ready");
@@ -162,17 +163,10 @@ declare function showDialog(options: {
   buttons: string[];
 }): Promise<boolean>;
 
-// Stub for example code - represents a hypothetical model context storage
-declare let modelContext: {
-  type: string;
-  content: unknown;
-  structuredContent: unknown;
-  timestamp: number;
+// Stub for example code - represents a hypothetical model context manager
+declare const modelContextManager: {
+  update(context: { content?: unknown; structuredContent?: unknown }): void;
 };
-
-// Stub for example code - represents a hypothetical MCP client that can be passed to AppBridge
-// Using Client type directly since AppBridge expects Client | null
-declare const mcpClient: Client;
 
 /**
  * Example: Handle external link requests from the Guest UI.
@@ -209,13 +203,8 @@ function AppBridge_onupdatemodelcontext_storeContext(bridge: AppBridge) {
     { content, structuredContent },
     extra,
   ) => {
-    // Update the model context with the new snapshot
-    modelContext = {
-      type: "app_context",
-      content,
-      structuredContent,
-      timestamp: Date.now(),
-    };
+    // Store the context snapshot for inclusion in the next model request
+    modelContextManager.update({ content, structuredContent });
     return {};
   };
   //#endregion AppBridge_onupdatemodelcontext_storeContext
@@ -224,11 +213,14 @@ function AppBridge_onupdatemodelcontext_storeContext(bridge: AppBridge) {
 /**
  * Example: Forward tool calls to the MCP server.
  */
-function AppBridge_oncalltool_forwardToServer(bridge: AppBridge) {
+function AppBridge_oncalltool_forwardToServer(
+  bridge: AppBridge,
+  mcpClient: Client,
+) {
   //#region AppBridge_oncalltool_forwardToServer
-  bridge.oncalltool = async ({ name, arguments: args }, extra) => {
+  bridge.oncalltool = async (params, extra) => {
     return mcpClient.request(
-      { method: "tools/call", params: { name, arguments: args } },
+      { method: "tools/call", params },
       CallToolResultSchema,
       { signal: extra.signal },
     );
@@ -239,7 +231,10 @@ function AppBridge_oncalltool_forwardToServer(bridge: AppBridge) {
 /**
  * Example: Forward list resources requests to the MCP server.
  */
-function AppBridge_onlistresources_returnResources(bridge: AppBridge) {
+function AppBridge_onlistresources_returnResources(
+  bridge: AppBridge,
+  mcpClient: Client,
+) {
   //#region AppBridge_onlistresources_returnResources
   bridge.onlistresources = async (params, extra) => {
     return mcpClient.request(
@@ -254,11 +249,14 @@ function AppBridge_onlistresources_returnResources(bridge: AppBridge) {
 /**
  * Example: Forward read resource requests to the MCP server.
  */
-function AppBridge_onreadresource_returnResource(bridge: AppBridge) {
+function AppBridge_onreadresource_returnResource(
+  bridge: AppBridge,
+  mcpClient: Client,
+) {
   //#region AppBridge_onreadresource_returnResource
-  bridge.onreadresource = async ({ uri }, extra) => {
+  bridge.onreadresource = async (params, extra) => {
     return mcpClient.request(
-      { method: "resources/read", params: { uri } },
+      { method: "resources/read", params },
       ReadResourceResultSchema,
       { signal: extra.signal },
     );
@@ -269,7 +267,10 @@ function AppBridge_onreadresource_returnResource(bridge: AppBridge) {
 /**
  * Example: Forward list prompts requests to the MCP server.
  */
-function AppBridge_onlistprompts_returnPrompts(bridge: AppBridge) {
+function AppBridge_onlistprompts_returnPrompts(
+  bridge: AppBridge,
+  mcpClient: Client,
+) {
   //#region AppBridge_onlistprompts_returnPrompts
   bridge.onlistprompts = async (params, extra) => {
     return mcpClient.request(
@@ -280,14 +281,6 @@ function AppBridge_onlistprompts_returnPrompts(bridge: AppBridge) {
   };
   //#endregion AppBridge_onlistprompts_returnPrompts
 }
-
-// Stub for example code - represents a hypothetical iframe element
-declare const iframe: HTMLIFrameElement;
-
-// Stub for example code - represents a hypothetical host context
-declare const hostContext: {
-  availableDisplayModes?: Array<"inline" | "fullscreen" | "pip">;
-};
 
 /**
  * Example: Handle ping requests from the Guest UI.
@@ -303,7 +296,10 @@ function AppBridge_onping_handleRequest(bridge: AppBridge) {
 /**
  * Example: Handle size change notifications from the Guest UI.
  */
-function AppBridge_onsizechange_handleResize(bridge: AppBridge) {
+function AppBridge_onsizechange_handleResize(
+  bridge: AppBridge,
+  iframe: HTMLIFrameElement,
+) {
   //#region AppBridge_onsizechange_handleResize
   bridge.onsizechange = ({ width, height }) => {
     if (width != null) {
@@ -319,18 +315,16 @@ function AppBridge_onsizechange_handleResize(bridge: AppBridge) {
 /**
  * Example: Handle display mode requests from the Guest UI.
  */
-function AppBridge_onrequestdisplaymode_handleRequest(bridge: AppBridge) {
+function AppBridge_onrequestdisplaymode_handleRequest(
+  bridge: AppBridge,
+  currentDisplayMode: McpUiDisplayMode,
+  availableDisplayModes: McpUiDisplayMode[],
+) {
   //#region AppBridge_onrequestdisplaymode_handleRequest
-  type McpUiDisplayMode = "inline" | "fullscreen" | "pip";
-  let currentDisplayMode: McpUiDisplayMode = "inline";
-
   bridge.onrequestdisplaymode = async ({ mode }, extra) => {
-    const availableModes = hostContext.availableDisplayModes ?? ["inline"];
-    if (availableModes.includes(mode)) {
+    if (availableDisplayModes.includes(mode)) {
       currentDisplayMode = mode;
-      return { mode };
     }
-    // Return current mode if requested mode not available
     return { mode: currentDisplayMode };
   };
   //#endregion AppBridge_onrequestdisplaymode_handleRequest
@@ -342,9 +336,8 @@ function AppBridge_onrequestdisplaymode_handleRequest(bridge: AppBridge) {
 function AppBridge_onloggingmessage_handleLog(bridge: AppBridge) {
   //#region AppBridge_onloggingmessage_handleLog
   bridge.onloggingmessage = ({ level, logger, data }) => {
-    const prefix = logger ? `[${logger}]` : "[Guest UI]";
     console[level === "error" ? "error" : "log"](
-      `${prefix} ${level.toUpperCase()}:`,
+      `[${logger ?? "Guest UI"}] ${level.toUpperCase()}:`,
       data,
     );
   };
@@ -354,7 +347,10 @@ function AppBridge_onloggingmessage_handleLog(bridge: AppBridge) {
 /**
  * Example: Gracefully tear down the Guest UI before unmounting.
  */
-async function AppBridge_teardownResource_gracefulShutdown(bridge: AppBridge) {
+async function AppBridge_teardownResource_gracefulShutdown(
+  bridge: AppBridge,
+  iframe: HTMLIFrameElement,
+) {
   //#region AppBridge_teardownResource_gracefulShutdown
   try {
     await bridge.teardownResource({});
@@ -422,21 +418,16 @@ function AppBridge_sendToolInputPartial_streaming(bridge: AppBridge) {
  */
 async function AppBridge_sendToolResult_afterExecution(
   bridge: AppBridge,
-  mcpClientParam: Client,
+  mcpClient: Client,
   args: Record<string, unknown>,
 ) {
   //#region AppBridge_sendToolResult_afterExecution
-  // import { CallToolResultSchema } from '@modelcontextprotocol/sdk/types.js';
-
   const result = await mcpClient.request(
     { method: "tools/call", params: { name: "get_weather", arguments: args } },
     CallToolResultSchema,
   );
   bridge.sendToolResult(result);
   //#endregion AppBridge_sendToolResult_afterExecution
-
-  // Make the parameter used to satisfy linting
-  void mcpClientParam;
 }
 
 /**
@@ -466,7 +457,8 @@ function AppBridge_sendToolCancelled_systemLevel(bridge: AppBridge) {
  * Example: Connect with MCP client for automatic forwarding.
  */
 async function AppBridge_connect_withMcpClient(
-  mcpClientParam: Client,
+  iframe: HTMLIFrameElement,
+  mcpClient: Client,
   hostInfo: { name: string; version: string },
   capabilities: { openLinks: {}; serverTools: {}; logging: {} },
   toolArgs: Record<string, unknown>,
