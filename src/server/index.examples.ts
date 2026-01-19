@@ -86,11 +86,10 @@ function registerAppTool_basicUsage(server: McpServer) {
 }
 
 /**
- * Example: Tool visibility - create app-only tools for UI actions.
+ * Example: Model-only visibility - tools visible to model but not callable by UI.
  */
-function registerAppTool_toolVisibility(server: McpServer) {
-  //#region registerAppTool_toolVisibility
-  // Main tool - visible to both model and app (default)
+function registerAppTool_modelOnlyVisibility(server: McpServer) {
+  //#region registerAppTool_modelOnlyVisibility
   registerAppTool(
     server,
     "show-cart",
@@ -99,7 +98,7 @@ function registerAppTool_toolVisibility(server: McpServer) {
       _meta: {
         ui: {
           resourceUri: "ui://shop/cart.html",
-          visibility: ["model", "app"],
+          visibility: ["model"],
         },
       },
     },
@@ -108,8 +107,14 @@ function registerAppTool_toolVisibility(server: McpServer) {
       return { content: [{ type: "text", text: JSON.stringify(cart) }] };
     },
   );
+  //#endregion registerAppTool_modelOnlyVisibility
+}
 
-  // App-only tool - hidden from the model, only callable by the UI
+/**
+ * Example: App-only visibility - tools hidden from model, only callable by UI.
+ */
+function registerAppTool_appOnlyVisibility(server: McpServer) {
+  //#region registerAppTool_appOnlyVisibility
   registerAppTool(
     server,
     "update-quantity",
@@ -128,7 +133,7 @@ function registerAppTool_toolVisibility(server: McpServer) {
       return { content: [{ type: "text", text: JSON.stringify(cart) }] };
     },
   );
-  //#endregion registerAppTool_toolVisibility
+  //#endregion registerAppTool_appOnlyVisibility
 }
 
 /**

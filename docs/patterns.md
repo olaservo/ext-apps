@@ -6,11 +6,11 @@ title: Patterns
 
 This document covers common patterns and recipes for building MCP Apps.
 
-## [TODO] Tools that are private to Apps
+## Tools that are private to Apps
 
-Use `Tool._meta.ui.visibility: ["apps"]` to make tools only visible to Apps.
+Set {@link types!McpUiToolMeta.visibility Tool.\_meta.ui.visibility} to `["app"]` to make tools only callable by Apps (hidden from the model). This is useful for UI-driven actions like updating quantities, toggling settings, or other interactions that shouldn't appear in the model's tool list.
 
-{@includeCode ./patterns.ts#privateTools}
+{@includeCode ../src/server/index.examples.ts#registerAppTool_appOnlyVisibility}
 
 ## [TODO] Authenticated calls from App
 

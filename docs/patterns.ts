@@ -9,17 +9,6 @@
 
 import { App } from "../src/app.js";
 
-// TODO: Add imports as patterns are implemented
-
-/**
- * Example: Tools that are private to Apps
- */
-function privateTools() {
-  //#region privateTools
-  // TODO: Tool._meta.ui.visibility: ["apps"]
-  //#endregion privateTools
-}
-
 /**
  * Example: Authenticated calls from App
  */
@@ -121,7 +110,6 @@ function migrateFromOpenai() {
 }
 
 // Suppress unused variable warnings
-void privateTools;
 void authenticatedCalls;
 void errorsToModel;
 void hostStyling;

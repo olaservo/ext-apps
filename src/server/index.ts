@@ -117,8 +117,11 @@ export interface McpUiAppResourceConfig extends ResourceMetadata {
  * @example Basic usage
  * {@includeCode ./index.examples.ts#registerAppTool_basicUsage}
  *
- * @example Tool visibility - create app-only tools for UI actions
- * {@includeCode ./index.examples.ts#registerAppTool_toolVisibility}
+ * @example Tool visible to model but not callable by UI
+ * {@includeCode ./index.examples.ts#registerAppTool_modelOnlyVisibility}
+ *
+ * @example Tool hidden from model, only callable by UI
+ * {@includeCode ./index.examples.ts#registerAppTool_appOnlyVisibility}
  *
  * @see {@link registerAppResource} to register the HTML resource referenced by the tool
  */
