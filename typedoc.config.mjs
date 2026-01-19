@@ -4,7 +4,7 @@ import { OptionDefaults } from "typedoc";
 const config = {
   blockTags: [...OptionDefaults.blockTags, "@description"],
   intentionallyNotExported: ["AppOptions"],
-  projectDocuments: ["docs/quickstart.md"],
+  projectDocuments: ["docs/quickstart.md", "docs/patterns.md"],
   entryPoints: [
     "src/server/index.ts",
     "src/app.ts",

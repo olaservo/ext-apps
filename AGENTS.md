@@ -82,6 +82,8 @@ Guest UI (App) <--PostMessageTransport--> Host (AppBridge) <--MCP Client--> MCP 
 
 JSDoc `@example` tags use `{@includeCode ./file.examples.ts#regionName}` to pull in type-checked code from companion `.examples.ts`/`.examples.tsx` files. Regions are marked with `//#region name` and `//#endregion name`, wrapped in functions (whose parameters provide types for external values). Region names follow `exportedName_variant` or `ClassName_methodName_variant` pattern (e.g., `useApp_basicUsage`, `App_hostCapabilities_checkAfterConnection`).
 
+Standalone docs in `docs/` (listed in `typedoc.config.mjs` `projectDocuments`) can also have type-checked companion `.ts` files using the same `@includeCode` pattern.
+
 ## Full Examples
 
 Uses npm workspaces. Full examples in `examples/` are separate packages:
