@@ -12,9 +12,17 @@ Install via Claude Code:
 
 ## Usage
 
-Invoke the skill by asking Claude Code to:
+Invoke skills by asking Claude Code to:
+
+### Create MCP App
 
 - "Create an MCP App"
 - "Add a UI to an MCP tool"
 - "Build an interactive MCP widget"
 - "Scaffold an MCP App"
+
+### Migrate from OpenAI
+
+- "Migrate from OpenAI Apps SDK"
+- "Convert OpenAI App to MCP"
+- "Port from window.openai"

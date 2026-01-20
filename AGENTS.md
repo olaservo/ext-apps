@@ -88,4 +88,7 @@ Uses npm workspaces. Examples in `examples/` are separate packages:
 
 ## Claude Code Plugin
 
-The `plugins/mcp-apps/` directory contains a Claude Code plugin distributed via the plugin marketplace. It provides the "Create MCP App" skill (`plugins/mcp-apps/skills/create-mcp-app/SKILL.md`) that guides users through building MCP Apps with interactive UIs.
+The `plugins/mcp-apps/` directory contains a Claude Code plugin distributed via the plugin marketplace. It provides the following Claude Code skills files:
+
+- `plugins/mcp-apps/skills/create-mcp-app/SKILL.md` — for creating an MCP App
+- `plugins/mcp-apps/skills/migrate-oai-app/SKILL.md` — for migrating an app from the OpenAI Apps SDK to the MCP Apps SDK

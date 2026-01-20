@@ -24,19 +24,29 @@ This guide helps you migrate from the OpenAI Apps SDK to the MCP Apps SDK (`@mod
 
 ### Resource Metadata
 
-| OpenAI                                | MCP Apps                 | Notes                                                                              |
-| ------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------- |
-| `_meta["openai/widgetCSP"]`           | `_meta.ui.csp`           | `connect_domains` → `connectDomains`, `resource_domains` → `resourceDomains`, etc. |
-| —                                     | `_meta.ui.permissions`   | MCP adds: permissions for camera, microphone, geolocation, clipboard               |
-| `_meta["openai/widgetDomain"]`        | `_meta.ui.domain`        | Dedicated sandbox origin                                                           |
-| `_meta["openai/widgetPrefersBorder"]` | `_meta.ui.prefersBorder` | Visual boundary preference                                                         |
-| `_meta["openai/widgetDescription"]`   | —                        | Not yet implemented; use `app.updateModelContext()` for dynamic context            |
+| OpenAI                                | MCP Apps                 | Notes                                                                   |
+| ------------------------------------- | ------------------------ | ----------------------------------------------------------------------- |
+| `_meta["openai/widgetCSP"]`           | `_meta.ui.csp`           | See [CSP field mapping](#csp-field-mapping) below                       |
+| —                                     | `_meta.ui.permissions`   | MCP adds: permissions for camera, microphone, geolocation, clipboard    |
+| `_meta["openai/widgetDomain"]`        | `_meta.ui.domain`        | Dedicated sandbox origin                                                |
+| `_meta["openai/widgetPrefersBorder"]` | `_meta.ui.prefersBorder` | Visual boundary preference                                              |
+| `_meta["openai/widgetDescription"]`   | —                        | Not yet implemented; use `app.updateModelContext()` for dynamic context |
 
 ### Resource MIME Type
 
 | OpenAI                | MCP Apps                    | Notes                                                                            |
 | --------------------- | --------------------------- | -------------------------------------------------------------------------------- |
 | `text/html+skybridge` | `text/html;profile=mcp-app` | Auto-set by `registerAppResource()`; use `RESOURCE_MIME_TYPE` constant if manual |
+
+### CSP Field Mapping
+
+| OpenAI             | MCP Apps          | Notes                                                      |
+| ------------------ | ----------------- | ---------------------------------------------------------- |
+| `resource_domains` | `resourceDomains` | Origins for static assets (images, fonts, styles, scripts) |
+| `connect_domains`  | `connectDomains`  | Origins for fetch/XHR/WebSocket requests                   |
+| `frame_domains`    | `frameDomains`    | Origins for nested iframes                                 |
+| `redirect_domains` | —                 | OpenAI-only: origins for `openExternal` redirects          |
+| —                  | `baseUriDomains`  | MCP-only: `base-uri` CSP directive                         |
 
 ### Server-Side Migration Example
 
@@ -84,6 +94,13 @@ function createServer() {
           uri: "ui://widget/cart.html",
           mimeType: "text/html+skybridge",
           text: getCartHtml(),
+          _meta: {
+            "openai/widgetCSP": {
+              resource_domains: ["https://cdn.example.com"],
+              connect_domains: ["https://api.example.com"],
+              frame_domains: ["https://embed.example.com"],
+            },
+          },
         },
       ],
     }),
@@ -139,6 +156,15 @@ function createServer() {
           uri: "ui://widget/cart.html",
           mimeType: RESOURCE_MIME_TYPE,
           text: getCartHtml(),
+          _meta: {
+            ui: {
+              csp: {
+                resourceDomains: ["https://cdn.example.com"],
+                connectDomains: ["https://api.example.com"],
+                frameDomains: ["https://embed.example.com"],
+              },
+            },
+          },
         },
       ],
     }),
@@ -152,7 +178,7 @@ function createServer() {
 
 1. **Metadata Structure**: OpenAI uses flat `_meta["openai/..."]` properties; MCP uses nested `_meta.ui.*` structure
 2. **Tool Visibility**: OpenAI uses boolean/string (`true`/`"public"`); MCP uses string arrays (`["app", "model"]`)
-3. **CSP Property Names**: snake_case → camelCase (`connect_domains` → `connectDomains`)
+3. **CSP Field Names**: snake_case → camelCase (e.g., `connect_domains` → `connectDomains`)
 4. **App Permissions**: MCP adds `_meta.ui.permissions` for camera, microphone, geolocation, clipboard (not in OpenAI)
 5. **Resource MIME Type**: `text/html+skybridge` → `text/html;profile=mcp-app` (use `RESOURCE_MIME_TYPE` constant)
 6. **Helper Functions**: MCP provides `registerAppTool()` and `registerAppResource()` helpers
@@ -172,7 +198,7 @@ function createServer() {
 
 | OpenAI                           | MCP Apps                                           | Notes                                                                                                           |
 | -------------------------------- | -------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `window.openai` (auto-available) | `const app = new App({name, version}, {})`         | MCP requires explicit instantiation                                                                             |
+| `window.openai` (auto-available) | `const app = new App({name, version})`             | MCP requires explicit instantiation                                                                             |
 | (implicit)                       | Vanilla: `await app.connect()` / React: `useApp()` | MCP requires async connection; auto-detects OpenAI env                                                          |
 | —                                | `await app.connect(new OpenAITransport())`         | Force OpenAI mode (not yet available, see [PR #172](https://github.com/modelcontextprotocol/ext-apps/pull/172)) |
 | —                                | `await app.connect(new PostMessageTransport(...))` | Force MCP mode explicitly                                                                                       |

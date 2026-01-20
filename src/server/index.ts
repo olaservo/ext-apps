@@ -243,15 +243,22 @@ export function registerAppTool<
  * ```typescript
  * registerAppResource(server, "Music Player", "ui://music/player.html", {
  *   description: "Audio player with external soundfonts",
- *   _meta: {
- *     ui: {
- *       csp: {
- *         connectDomains: ["https://api.example.com"],  // For fetch/WebSocket
- *         resourceDomains: ["https://cdn.example.com"], // For scripts/styles/images
+ * }, async () => ({
+ *   contents: [{
+ *     uri: "ui://music/player.html",
+ *     mimeType: RESOURCE_MIME_TYPE,
+ *     text: PLAYER_HTML,
+ *     // CSP must be on the content item, not the resource config
+ *     _meta: {
+ *       ui: {
+ *         csp: {
+ *           connectDomains: ["https://api.example.com"],  // For fetch/WebSocket
+ *           resourceDomains: ["https://cdn.example.com"], // For scripts/styles/images
+ *         },
  *       },
  *     },
- *   },
- * }, readCallback);
+ *   }],
+ * }));
  * ```
  *
  * @see {@link registerAppTool} to register tools that reference this resource

@@ -71,7 +71,7 @@ Each template includes:
 
 ### API Reference (Source Files)
 
-Read JSDoc documentation directly from source:
+Read JSDoc documentation directly from `/tmp/mcp-ext-apps/src/`:
 
 | File | Contents |
 |------|----------|
