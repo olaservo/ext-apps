@@ -82,18 +82,6 @@ async function App_basicUsage() {
 }
 
 /**
- * Example: Sending a message to the host's chat.
- */
-async function App_sendMessage(app: App) {
-  //#region App_sendMessage
-  await app.sendMessage({
-    role: "user",
-    content: [{ type: "text", text: "Weather updated!" }],
-  });
-  //#endregion App_sendMessage
-}
-
-/**
  * Example: Check host capabilities after connection.
  */
 async function App_getHostCapabilities_checkAfterConnection(app: App) {
@@ -327,6 +315,33 @@ async function App_sendMessage_textFromInteraction(app: App) {
     // Handle transport/protocol error
   }
   //#endregion App_sendMessage_textFromInteraction
+}
+
+/**
+ * Example: Send follow-up message after offloading large data to model context.
+ */
+async function App_sendMessage_withLargeContext(
+  app: App,
+  fullTranscript: string,
+  speakerNames: string[],
+) {
+  //#region App_sendMessage_withLargeContext
+  const markdown = `---
+word-count: ${fullTranscript.split(/\s+/).length}
+speaker-names: ${speakerNames.join(", ")}
+---
+
+${fullTranscript}`;
+
+  // Offload long transcript to model context
+  await app.updateModelContext({ content: [{ type: "text", text: markdown }] });
+
+  // Send brief trigger message
+  await app.sendMessage({
+    role: "user",
+    content: [{ type: "text", text: "Summarize the key points" }],
+  });
+  //#endregion App_sendMessage_withLargeContext
 }
 
 /**

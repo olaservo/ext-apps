@@ -64,6 +64,12 @@ Use {@link app!App.updateModelContext updateModelContext} to keep the model info
 
 {@includeCode ../src/app.examples.ts#App_updateModelContext_appState}
 
+## Sending large follow-up messages
+
+When you need to send more data than fits in a message, use {@link app!App.updateModelContext updateModelContext} to set the context first, then {@link app!App.sendMessage sendMessage} with a brief prompt to trigger a response:
+
+{@includeCode ../src/app.examples.ts#App_sendMessage_withLargeContext}
+
 ## Persisting widget state
 
 To persist widget state across conversation reloads (e.g., current page in a PDF viewer, camera position in a map), use [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) with a stable identifier provided by the server.

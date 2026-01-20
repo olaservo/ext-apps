@@ -156,9 +156,6 @@ type RequestHandlerExtra = Parameters<
  *
  * @example Basic usage with PostMessageTransport
  * {@includeCode ./app.examples.ts#App_basicUsage}
- *
- * @example Sending a message to the host's chat
- * {@includeCode ./app.examples.ts#App_sendMessage}
  */
 export class App extends Protocol<AppRequest, AppNotification, AppResult> {
   private _hostCapabilities?: McpUiHostCapabilities;
@@ -617,6 +614,9 @@ export class App extends Protocol<AppRequest, AppNotification, AppResult> {
    *
    * @example Send a text message from user interaction
    * {@includeCode ./app.examples.ts#App_sendMessage_textFromInteraction}
+   *
+   * @example Send follow-up message after offloading large data to model context
+   * {@includeCode ./app.examples.ts#App_sendMessage_withLargeContext}
    *
    * @see {@link McpUiMessageRequest} for request structure
    */
