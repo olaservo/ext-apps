@@ -44,14 +44,13 @@ We have [contributed a tentative implementation](https://github.com/MCP-UI-Org/m
 npm install -S @modelcontextprotocol/ext-apps
 ```
 
-Or edit your `package.json` manually:
+### Claude Code Plugin
 
-```json
-{
-  "dependencies": {
-    "@modelcontextprotocol/ext-apps": "^0.0.1"
-  }
-}
+A [Claude Code plugin](https://github.com/modelcontextprotocol/ext-apps/tree/main/plugins/mcp-apps) is available to help create MCP Apps. To install, run these commands inside Claude Code:
+
+```
+/plugin marketplace add modelcontextprotocol/ext-apps
+/plugin install mcp-apps@modelcontextprotocol-ext-apps
 ```
 
 ## Examples

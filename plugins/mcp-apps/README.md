@@ -6,9 +6,10 @@ A Claude Code plugin that provides the "Create MCP App" skill for building MCP A
 
 Install via Claude Code:
 
-1. Run `/plugin` in Claude Code
-2. Navigate to the Discover tab
-3. Install "mcp-apps"
+```
+/plugin marketplace add modelcontextprotocol/ext-apps
+/plugin install mcp-apps@modelcontextprotocol-ext-apps
+```
 
 ## Usage
 
