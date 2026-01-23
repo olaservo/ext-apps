@@ -39,13 +39,13 @@ function index_overview(
   readCallback: ReadResourceCallback,
 ) {
   //#region index_overview
-  // Register a tool that displays a widget
+  // Register a tool that displays a view
   registerAppTool(
     server,
     "weather",
     {
       description: "Get weather forecast",
-      _meta: { ui: { resourceUri: "ui://weather/widget.html" } },
+      _meta: { ui: { resourceUri: "ui://weather/view.html" } },
     },
     toolCallback,
   );
@@ -53,8 +53,8 @@ function index_overview(
   // Register the HTML resource the tool references
   registerAppResource(
     server,
-    "Weather Widget",
-    "ui://weather/widget.html",
+    "Weather View",
+    "ui://weather/view.html",
     {},
     readCallback,
   );
@@ -74,7 +74,7 @@ function registerAppTool_basicUsage(server: McpServer) {
       description: "Get current weather for a location",
       inputSchema: { location: z.string() },
       _meta: {
-        ui: { resourceUri: "ui://weather/widget.html" },
+        ui: { resourceUri: "ui://weather/view.html" },
       },
     },
     async (args) => {
@@ -143,17 +143,17 @@ function registerAppResource_basicUsage(server: McpServer) {
   //#region registerAppResource_basicUsage
   registerAppResource(
     server,
-    "Weather Widget",
-    "ui://weather/widget.html",
+    "Weather View",
+    "ui://weather/view.html",
     {
       description: "Interactive weather display",
     },
     async () => ({
       contents: [
         {
-          uri: "ui://weather/widget.html",
+          uri: "ui://weather/view.html",
           mimeType: RESOURCE_MIME_TYPE,
-          text: await fs.readFile("dist/widget.html", "utf-8"),
+          text: await fs.readFile("dist/view.html", "utf-8"),
         },
       ],
     }),

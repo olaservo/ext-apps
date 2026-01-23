@@ -226,8 +226,8 @@ export interface McpUiSandboxResourceReadyNotification {
 }
 
 /**
- * @description Notification of UI size changes (Guest UI -> Host).
- * @see {@link app!App.sendSizeChanged `App.sendSizeChanged`} for the method to send this from Guest UI
+ * @description Notification of UI size changes (View -> Host).
+ * @see {@link app!App.sendSizeChanged `App.sendSizeChanged`} for the method to send this from View
  */
 export interface McpUiSizeChangedNotification {
   method: "ui/notifications/size-changed";
@@ -240,7 +240,7 @@ export interface McpUiSizeChangedNotification {
 }
 
 /**
- * @description Notification containing complete tool arguments (Host -> Guest UI).
+ * @description Notification containing complete tool arguments (Host -> View).
  */
 export interface McpUiToolInputNotification {
   method: "ui/notifications/tool-input";
@@ -251,7 +251,7 @@ export interface McpUiToolInputNotification {
 }
 
 /**
- * @description Notification containing partial/streaming tool arguments (Host -> Guest UI).
+ * @description Notification containing partial/streaming tool arguments (Host -> View).
  */
 export interface McpUiToolInputPartialNotification {
   method: "ui/notifications/tool-input-partial";
@@ -262,7 +262,7 @@ export interface McpUiToolInputPartialNotification {
 }
 
 /**
- * @description Notification containing tool execution result (Host -> Guest UI).
+ * @description Notification containing tool execution result (Host -> View).
  */
 export interface McpUiToolResultNotification {
   method: "ui/notifications/tool-result";
@@ -271,7 +271,7 @@ export interface McpUiToolResultNotification {
 }
 
 /**
- * @description Notification that tool execution was cancelled (Host -> Guest UI).
+ * @description Notification that tool execution was cancelled (Host -> View).
  * Host MUST send this if tool execution was cancelled for any reason (user action,
  * sampling error, classifier intervention, etc.).
  */
@@ -302,7 +302,7 @@ export interface McpUiHostStyles {
 }
 
 /**
- * @description Rich context about the host environment provided to Guest UIs.
+ * @description Rich context about the host environment provided to views.
  */
 export interface McpUiHostContext {
   /** @description Allow additional properties for forward compatibility. */
@@ -375,7 +375,7 @@ export interface McpUiHostContext {
 }
 
 /**
- * @description Notification that host context has changed (Host -> Guest UI).
+ * @description Notification that host context has changed (Host -> View).
  * @see {@link McpUiHostContext `McpUiHostContext`} for the full context structure
  */
 export interface McpUiHostContextChangedNotification {
@@ -385,10 +385,10 @@ export interface McpUiHostContextChangedNotification {
 }
 
 /**
- * @description Request to update the agent's context without requiring a follow-up action (Guest UI -> Host).
+ * @description Request to update the agent's context without requiring a follow-up action (View -> Host).
  *
  * Unlike `notifications/message` which is for debugging/logging, this request is intended
- * to update the Host's model context. Each request overwrites the previous context sent by the Guest UI.
+ * to update the Host's model context. Each request overwrites the previous context sent by the View.
  * Unlike messages, context updates do not trigger follow-ups.
  *
  * The host will typically defer sending the context to the model until the next user message
@@ -407,7 +407,7 @@ export interface McpUiUpdateModelContextRequest {
 }
 
 /**
- * @description Request for graceful shutdown of the Guest UI (Host -> Guest UI).
+ * @description Request for graceful shutdown of the View (Host -> View).
  * @see {@link app-bridge!AppBridge.teardownResource `AppBridge.teardownResource`} for the host method that sends this
  */
 export interface McpUiResourceTeardownRequest {
@@ -471,12 +471,12 @@ export interface McpUiHostCapabilities {
   };
   /** @description Host accepts context updates (ui/update-model-context) to be included in the model's context for future turns. */
   updateModelContext?: McpUiSupportedContentBlockModalities;
-  /** @description Host supports receiving content messages (ui/message) from the Guest UI. */
+  /** @description Host supports receiving content messages (ui/message) from the view. */
   message?: McpUiSupportedContentBlockModalities;
 }
 
 /**
- * @description Capabilities provided by the Guest UI ({@link app!App `App`}).
+ * @description Capabilities provided by the View ({@link app!App `App`}).
  * @see {@link McpUiInitializeRequest `McpUiInitializeRequest`} for the initialization request that includes these capabilities
  */
 export interface McpUiAppCapabilities {
@@ -490,7 +490,7 @@ export interface McpUiAppCapabilities {
 }
 
 /**
- * @description Initialization request sent from Guest UI to Host.
+ * @description Initialization request sent from View to Host.
  * @see {@link app!App.connect `App.connect`} for the method that sends this request
  */
 export interface McpUiInitializeRequest {
@@ -506,7 +506,7 @@ export interface McpUiInitializeRequest {
 }
 
 /**
- * @description Initialization result returned from Host to Guest UI.
+ * @description Initialization result returned from Host to View.
  * @see {@link McpUiInitializeRequest `McpUiInitializeRequest`}
  */
 export interface McpUiInitializeResult {
@@ -526,7 +526,7 @@ export interface McpUiInitializeResult {
 }
 
 /**
- * @description Notification that Guest UI has completed initialization (Guest UI -> Host).
+ * @description Notification that View has completed initialization (View -> Host).
  * @see {@link app!App.connect `App.connect`} for the method that sends this notification
  */
 export interface McpUiInitializedNotification {
@@ -572,7 +572,7 @@ export interface McpUiResourceMeta {
   csp?: McpUiResourceCsp;
   /** @description Sandbox permissions requested by the UI. */
   permissions?: McpUiResourcePermissions;
-  /** @description Dedicated origin for widget sandbox. */
+  /** @description Dedicated origin for view sandbox. */
   domain?: string;
   /** @description Visual boundary preference - true if UI prefers a visible border. */
   prefersBorder?: boolean;
@@ -619,7 +619,7 @@ export interface McpUiToolMeta {
    * URI of the UI resource to display for this tool, if any.
    * This is converted to `_meta["ui/resourceUri"]`.
    *
-   * @example "ui://weather/widget.html"
+   * @example "ui://weather/view.html"
    */
   resourceUri?: string;
   /**

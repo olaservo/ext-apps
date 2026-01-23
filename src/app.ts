@@ -122,7 +122,7 @@ type RequestHandlerExtra = Parameters<
  *
  * ## Architecture
  *
- * Guest UIs (Apps) act as MCP clients connecting to the host via {@link PostMessageTransport `PostMessageTransport`}.
+ * Views (Apps) act as MCP clients connecting to the host via {@link PostMessageTransport `PostMessageTransport`}.
  * The host proxies requests to the actual MCP server and forwards
  * responses back to the App.
  *

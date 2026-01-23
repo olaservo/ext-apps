@@ -6,7 +6,7 @@ MCP Apps SDK (`@modelcontextprotocol/ext-apps`) enables MCP servers to display i
 
 Key abstractions:
 
-- **Guest** - UI running in an iframe, uses `App` class with `PostMessageTransport` to communicate with host
+- **View** - UI running in an iframe, uses `App` class with `PostMessageTransport` to communicate with host
 - **Host** - Chat client embedding the iframe, uses `AppBridge` class to proxy MCP requests
 - **Server** - MCP server that registers tools/resources with UI metadata
 
@@ -67,14 +67,14 @@ rm -fR  package-lock.json node_modules && \
 ### Protocol Flow
 
 ```
-Guest UI (App) <--PostMessageTransport--> Host (AppBridge) <--MCP Client--> MCP Server
+View (App) <--PostMessageTransport--> Host (AppBridge) <--MCP Client--> MCP Server
 ```
 
-1. Host creates iframe with Guest UI HTML
-2. Guest UI creates `App` instance and calls `connect()` with `PostMessageTransport`
-3. App sends `ui/initialize` request, receives host capabilities and context
+1. Host creates iframe with view HTML
+2. View creates `App` instance and calls `connect()` with `PostMessageTransport`
+3. View sends `ui/initialize` request, receives host capabilities and context
 4. Host sends `sendToolInput()` with tool arguments after initialization
-5. Guest UI can call server tools via `app.callServerTool()` or send messages via `app.sendMessage()`
+5. View can call server tools via `app.callServerTool()` or send messages via `app.sendMessage()`
 6. Host sends `sendToolResult()` when tool execution completes
 7. Host calls `teardownResource()` before unmounting iframe
 

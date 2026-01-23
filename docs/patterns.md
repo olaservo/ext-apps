@@ -82,11 +82,11 @@ When you need to send more data than fits in a message, use {@link app!App.updat
 
 _See [`examples/transcript-server/`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/transcript-server) for a full implementation of this pattern._
 
-## Persisting widget state
+## Persisting view state
 
-To persist widget state across conversation reloads (e.g., current page in a PDF viewer, camera position in a map), use [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) with a stable identifier provided by the server.
+To persist view state across conversation reloads (e.g., current page in a PDF viewer, camera position in a map), use [`localStorage`](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) with a stable identifier provided by the server.
 
-**Server-side**: Tool handler generates a unique `widgetUUID` and returns it in `CallToolResult._meta.widgetUUID`:
+**Server-side**: Tool handler generates a unique `viewUUID` and returns it in `CallToolResult._meta.viewUUID`:
 
 {@includeCode ./patterns.tsx#persistDataServer}
 
@@ -96,9 +96,9 @@ To persist widget state across conversation reloads (e.g., current page in a PDF
 
 _See [`examples/map-server/`](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/map-server) for a full implementation of this pattern._
 
-## Pausing computation-heavy widgets when out of view
+## Pausing computation-heavy views when out of view
 
-Widgets with animations, WebGL rendering, or polling can consume significant CPU/GPU even when scrolled out of view. Use [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) to pause expensive operations when the widget isn't visible:
+Views with animations, WebGL rendering, or polling can consume significant CPU/GPU even when scrolled out of view. Use [`IntersectionObserver`](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API) to pause expensive operations when the view isn't visible:
 
 {@includeCode ./patterns.tsx#visibilityBasedPause}
 

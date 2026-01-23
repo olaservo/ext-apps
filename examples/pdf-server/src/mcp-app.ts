@@ -35,7 +35,7 @@ let totalPages = 0;
 let scale = 1.0;
 let pdfUrl = "";
 let pdfTitle: string | undefined;
-let widgetUUID: string | undefined;
+let viewUUID: string | undefined;
 let currentRenderTask: { cancel: () => void } | null = null;
 
 // DOM Elements
@@ -404,10 +404,10 @@ async function renderPage() {
 }
 
 function saveCurrentPage() {
-  log.info("saveCurrentPage: key=", widgetUUID, "page=", currentPage);
-  if (widgetUUID) {
+  log.info("saveCurrentPage: key=", viewUUID, "page=", currentPage);
+  if (viewUUID) {
     try {
-      localStorage.setItem(widgetUUID, String(currentPage));
+      localStorage.setItem(viewUUID, String(currentPage));
       log.info("saveCurrentPage: saved successfully");
     } catch (err) {
       log.error("saveCurrentPage: error", err);
@@ -416,10 +416,10 @@ function saveCurrentPage() {
 }
 
 function loadSavedPage(): number | null {
-  log.info("loadSavedPage: key=", widgetUUID);
-  if (!widgetUUID) return null;
+  log.info("loadSavedPage: key=", viewUUID);
+  if (!viewUUID) return null;
   try {
-    const saved = localStorage.getItem(widgetUUID);
+    const saved = localStorage.getItem(viewUUID);
     log.info("loadSavedPage: saved value=", saved);
     if (saved) {
       const page = parseInt(saved, 10);
@@ -706,9 +706,7 @@ app.ontoolresult = async (result) => {
   pdfUrl = parsed.url;
   pdfTitle = parsed.title;
   totalPages = parsed.pageCount;
-  widgetUUID = result._meta?.widgetUUID
-    ? String(result._meta.widgetUUID)
-    : undefined;
+  viewUUID = result._meta?.viewUUID ? String(result._meta.viewUUID) : undefined;
 
   // Restore saved page or use initial page
   const savedPage = loadSavedPage();

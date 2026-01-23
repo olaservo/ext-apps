@@ -206,21 +206,17 @@ function hostStylingReact() {
 }
 
 /**
- * Example: Persisting widget state (server-side)
+ * Example: Persisting view state (server-side)
  */
-function persistWidgetStateServer(
-  url: string,
-  title: string,
-  pageCount: number,
-) {
+function persistViewStateServer(url: string, title: string, pageCount: number) {
   function toolCallback(): CallToolResult {
     //#region persistDataServer
-    // In your tool callback, include widgetUUID in the result metadata.
+    // In your tool callback, include viewUUID in the result metadata.
     return {
       content: [{ type: "text", text: `Displaying PDF viewer for "${title}"` }],
       structuredContent: { url, title, pageCount, initialPage: 1 },
       _meta: {
-        widgetUUID: randomUUID(),
+        viewUUID: randomUUID(),
       },
     };
     //#endregion persistDataServer
@@ -228,39 +224,39 @@ function persistWidgetStateServer(
 }
 
 /**
- * Example: Persisting widget state (client-side)
+ * Example: Persisting view state (client-side)
  */
-function persistWidgetState(app: App) {
+function persistViewState(app: App) {
   //#region persistData
-  // Store the widgetUUID received from the server
-  let widgetUUID: string | undefined;
+  // Store the viewUUID received from the server
+  let viewUUID: string | undefined;
 
   // Helper to save state to localStorage
   function saveState<T>(state: T): void {
-    if (!widgetUUID) return;
+    if (!viewUUID) return;
     try {
-      localStorage.setItem(widgetUUID, JSON.stringify(state));
+      localStorage.setItem(viewUUID, JSON.stringify(state));
     } catch (err) {
-      console.error("Failed to save widget state:", err);
+      console.error("Failed to save view state:", err);
     }
   }
 
   // Helper to load state from localStorage
   function loadState<T>(): T | null {
-    if (!widgetUUID) return null;
+    if (!viewUUID) return null;
     try {
-      const saved = localStorage.getItem(widgetUUID);
+      const saved = localStorage.getItem(viewUUID);
       return saved ? (JSON.parse(saved) as T) : null;
     } catch (err) {
-      console.error("Failed to load widget state:", err);
+      console.error("Failed to load view state:", err);
       return null;
     }
   }
 
-  // Receive widgetUUID from the tool result
+  // Receive viewUUID from the tool result
   app.ontoolresult = (result) => {
-    widgetUUID = result._meta?.widgetUUID
-      ? String(result._meta.widgetUUID)
+    viewUUID = result._meta?.viewUUID
+      ? String(result._meta.viewUUID)
       : undefined;
 
     // Restore any previously saved state
@@ -270,13 +266,13 @@ function persistWidgetState(app: App) {
     }
   };
 
-  // Call saveState() whenever your widget state changes
+  // Call saveState() whenever your view state changes
   // e.g., saveState({ currentPage: 5 });
   //#endregion persistData
 }
 
 /**
- * Example: Pausing computation-heavy widgets when out of view
+ * Example: Pausing computation-heavy views when out of view
  */
 function visibilityBasedPause(
   app: App,
@@ -284,7 +280,7 @@ function visibilityBasedPause(
   animation: { play: () => void; pause: () => void },
 ) {
   //#region visibilityBasedPause
-  // Use IntersectionObserver to pause when widget scrolls out of view
+  // Use IntersectionObserver to pause when view scrolls out of view
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -296,7 +292,7 @@ function visibilityBasedPause(
   });
   observer.observe(container);
 
-  // Clean up when the host tears down the widget
+  // Clean up when the host tears down the view
   app.onteardown = async () => {
     observer.disconnect();
     animation.pause();
@@ -310,6 +306,6 @@ void chunkedDataServer;
 void chunkedDataClient;
 void hostStylingVanillaJs;
 void hostStylingReact;
-void persistWidgetStateServer;
-void persistWidgetState;
+void persistViewStateServer;
+void persistViewState;
 void visibilityBasedPause;

@@ -72,7 +72,7 @@ function createServer() {
       inputSchema: { userId: z.string() },
       annotations: { readOnlyHint: true },
       _meta: {
-        "openai/outputTemplate": "ui://widget/cart.html",
+        "openai/outputTemplate": "ui://view/cart.html",
         "openai/toolInvocation/invoking": "Loading cart...",
         "openai/toolInvocation/invoked": "Cart ready",
         "openai/widgetAccessible": true,
@@ -89,13 +89,13 @@ function createServer() {
 
   // Register UI resource
   server.registerResource(
-    "Cart Widget",
-    "ui://widget/cart.html",
+    "Cart View",
+    "ui://view/cart.html",
     { mimeType: "text/html+skybridge" },
     async () => ({
       contents: [
         {
-          uri: "ui://widget/cart.html",
+          uri: "ui://view/cart.html",
           mimeType: "text/html+skybridge",
           text: getCartHtml(),
           _meta: {
@@ -137,7 +137,7 @@ function createServer() {
       description: "Display the user's shopping cart",
       inputSchema: { userId: z.string() },
       annotations: { readOnlyHint: true },
-      _meta: { ui: { resourceUri: "ui://widget/cart.html" } },
+      _meta: { ui: { resourceUri: "ui://view/cart.html" } },
     },
     async (args) => {
       const cart = await getCart(args.userId);
@@ -151,13 +151,13 @@ function createServer() {
   // Register UI resource
   registerAppResource(
     server,
-    "Cart Widget",
-    "ui://widget/cart.html",
+    "Cart View",
+    "ui://view/cart.html",
     { description: "Shopping cart UI" },
     async () => ({
       contents: [
         {
-          uri: "ui://widget/cart.html",
+          uri: "ui://view/cart.html",
           mimeType: RESOURCE_MIME_TYPE,
           text: getCartHtml(),
           _meta: {

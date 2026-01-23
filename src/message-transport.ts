@@ -18,18 +18,18 @@ import {
  * ## Security
  *
  * The `eventSource` parameter is required and validates the message source window
- * by checking `event.source`. For guest UIs, pass `window.parent`.
+ * by checking `event.source`. For views, pass `window.parent`.
  * For hosts, pass `iframe.contentWindow` to validate the iframe source.
  *
  * ## Usage
  *
- * **Guest UI**:
- * {@includeCode ./message-transport.examples.ts#PostMessageTransport_guestUI}
+ * **View**:
+ * {@includeCode ./message-transport.examples.ts#PostMessageTransport_view}
  *
  * **Host**:
  * {@includeCode ./message-transport.examples.ts#PostMessageTransport_host}
  *
- * @see {@link app!App.connect `App.connect`} for Guest UI usage
+ * @see {@link app!App.connect `App.connect`} for View usage
  * @see {@link app-bridge!AppBridge.connect `AppBridge.connect`} for Host usage
  */
 export class PostMessageTransport implements Transport {
@@ -42,11 +42,11 @@ export class PostMessageTransport implements Transport {
    * Create a new PostMessageTransport.
    *
    * @param eventTarget - Target window to send messages to (default: `window.parent`)
-   * @param eventSource - Source window for message validation. For guests, pass
+   * @param eventSource - Source window for message validation. For views, pass
    *   `window.parent`. For hosts, pass `iframe.contentWindow`.
    *
-   * @example Guest UI connecting to parent
-   * {@includeCode ./message-transport.examples.ts#PostMessageTransport_constructor_guestUI}
+   * @example View connecting to parent
+   * {@includeCode ./message-transport.examples.ts#PostMessageTransport_constructor_view}
    *
    * @example Host connecting to iframe
    * {@includeCode ./message-transport.examples.ts#PostMessageTransport_constructor_host}

@@ -246,8 +246,8 @@ export const McpUiResourcePermissionsSchema = z.object({
 });
 
 /**
- * @description Notification of UI size changes (Guest UI -> Host).
- * @see {@link app!App.sendSizeChanged `App.sendSizeChanged`} for the method to send this from Guest UI
+ * @description Notification of UI size changes (View -> Host).
+ * @see {@link app!App.sendSizeChanged `App.sendSizeChanged`} for the method to send this from View
  */
 export const McpUiSizeChangedNotificationSchema = z.object({
   method: z.literal("ui/notifications/size-changed"),
@@ -260,7 +260,7 @@ export const McpUiSizeChangedNotificationSchema = z.object({
 });
 
 /**
- * @description Notification containing complete tool arguments (Host -> Guest UI).
+ * @description Notification containing complete tool arguments (Host -> View).
  */
 export const McpUiToolInputNotificationSchema = z.object({
   method: z.literal("ui/notifications/tool-input"),
@@ -279,7 +279,7 @@ export const McpUiToolInputNotificationSchema = z.object({
 });
 
 /**
- * @description Notification containing partial/streaming tool arguments (Host -> Guest UI).
+ * @description Notification containing partial/streaming tool arguments (Host -> View).
  */
 export const McpUiToolInputPartialNotificationSchema = z.object({
   method: z.literal("ui/notifications/tool-input-partial"),
@@ -298,7 +298,7 @@ export const McpUiToolInputPartialNotificationSchema = z.object({
 });
 
 /**
- * @description Notification that tool execution was cancelled (Host -> Guest UI).
+ * @description Notification that tool execution was cancelled (Host -> View).
  * Host MUST send this if tool execution was cancelled for any reason (user action,
  * sampling error, classifier intervention, etc.).
  */
@@ -338,7 +338,7 @@ export const McpUiHostStylesSchema = z.object({
 });
 
 /**
- * @description Request for graceful shutdown of the Guest UI (Host -> Guest UI).
+ * @description Request for graceful shutdown of the View (Host -> View).
  * @see {@link app-bridge!AppBridge.teardownResource `AppBridge.teardownResource`} for the host method that sends this
  */
 export const McpUiResourceTeardownRequestSchema = z.object({
@@ -443,14 +443,14 @@ export const McpUiHostCapabilitiesSchema = z.object({
     McpUiSupportedContentBlockModalitiesSchema.optional().describe(
       "Host accepts context updates (ui/update-model-context) to be included in the model's context for future turns.",
     ),
-  /** @description Host supports receiving content messages (ui/message) from the Guest UI. */
+  /** @description Host supports receiving content messages (ui/message) from the view. */
   message: McpUiSupportedContentBlockModalitiesSchema.optional().describe(
-    "Host supports receiving content messages (ui/message) from the Guest UI.",
+    "Host supports receiving content messages (ui/message) from the view.",
   ),
 });
 
 /**
- * @description Capabilities provided by the Guest UI ({@link app!App `App`}).
+ * @description Capabilities provided by the View ({@link app!App `App`}).
  * @see {@link McpUiInitializeRequest `McpUiInitializeRequest`} for the initialization request that includes these capabilities
  */
 export const McpUiAppCapabilitiesSchema = z.object({
@@ -473,7 +473,7 @@ export const McpUiAppCapabilitiesSchema = z.object({
 });
 
 /**
- * @description Notification that Guest UI has completed initialization (Guest UI -> Host).
+ * @description Notification that View has completed initialization (View -> Host).
  * @see {@link app!App.connect `App.connect`} for the method that sends this notification
  */
 export const McpUiInitializedNotificationSchema = z.object({
@@ -493,11 +493,8 @@ export const McpUiResourceMetaSchema = z.object({
   permissions: McpUiResourcePermissionsSchema.optional().describe(
     "Sandbox permissions requested by the UI.",
   ),
-  /** @description Dedicated origin for widget sandbox. */
-  domain: z
-    .string()
-    .optional()
-    .describe("Dedicated origin for widget sandbox."),
+  /** @description Dedicated origin for view sandbox. */
+  domain: z.string().optional().describe("Dedicated origin for view sandbox."),
   /** @description Visual boundary preference - true if UI prefers a visible border. */
   prefersBorder: z
     .boolean()
@@ -549,7 +546,7 @@ export const McpUiToolMetaSchema = z.object({
    * URI of the UI resource to display for this tool, if any.
    * This is converted to `_meta["ui/resourceUri"]`.
    *
-   * @example "ui://weather/widget.html"
+   * @example "ui://weather/view.html"
    */
   resourceUri: z.string().optional(),
   /**
@@ -610,7 +607,7 @@ export const McpUiSandboxResourceReadyNotificationSchema = z.object({
 });
 
 /**
- * @description Notification containing tool execution result (Host -> Guest UI).
+ * @description Notification containing tool execution result (Host -> View).
  */
 export const McpUiToolResultNotificationSchema = z.object({
   method: z.literal("ui/notifications/tool-result"),
@@ -619,7 +616,7 @@ export const McpUiToolResultNotificationSchema = z.object({
 });
 
 /**
- * @description Rich context about the host environment provided to Guest UIs.
+ * @description Rich context about the host environment provided to views.
  */
 export const McpUiHostContextSchema = z
   .object({
@@ -739,7 +736,7 @@ export const McpUiHostContextSchema = z
   .passthrough();
 
 /**
- * @description Notification that host context has changed (Host -> Guest UI).
+ * @description Notification that host context has changed (Host -> View).
  * @see {@link McpUiHostContext `McpUiHostContext`} for the full context structure
  */
 export const McpUiHostContextChangedNotificationSchema = z.object({
@@ -751,10 +748,10 @@ export const McpUiHostContextChangedNotificationSchema = z.object({
 });
 
 /**
- * @description Request to update the agent's context without requiring a follow-up action (Guest UI -> Host).
+ * @description Request to update the agent's context without requiring a follow-up action (View -> Host).
  *
  * Unlike `notifications/message` which is for debugging/logging, this request is intended
- * to update the Host's model context. Each request overwrites the previous context sent by the Guest UI.
+ * to update the Host's model context. Each request overwrites the previous context sent by the View.
  * Unlike messages, context updates do not trigger follow-ups.
  *
  * The host will typically defer sending the context to the model until the next user message
@@ -784,7 +781,7 @@ export const McpUiUpdateModelContextRequestSchema = z.object({
 });
 
 /**
- * @description Initialization request sent from Guest UI to Host.
+ * @description Initialization request sent from View to Host.
  * @see {@link app!App.connect `App.connect`} for the method that sends this request
  */
 export const McpUiInitializeRequestSchema = z.object({
@@ -804,7 +801,7 @@ export const McpUiInitializeRequestSchema = z.object({
 });
 
 /**
- * @description Initialization result returned from Host to Guest UI.
+ * @description Initialization result returned from Host to View.
  * @see {@link McpUiInitializeRequest `McpUiInitializeRequest`}
  */
 export const McpUiInitializeResultSchema = z
