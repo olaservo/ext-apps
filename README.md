@@ -47,7 +47,7 @@ Embed and communicate with MCP Apps in your chat application.
 
 There's no _supported_ host implementation in this repo (beyond the [examples/basic-host](https://github.com/modelcontextprotocol/ext-apps/tree/main/examples/basic-host) example).
 
-We have [contributed a tentative implementation](https://github.com/MCP-UI-Org/mcp-ui/pull/147) of hosting / iframing / sandboxing logic to the [MCP-UI](https://github.com/idosal/mcp-ui) repository, and expect OSS clients may use it, while other clients might roll their own hosting logic.
+The [MCP-UI](https://github.com/idosal/mcp-ui) client SDK offers a fully-featured MCP Apps framework used by a few hosts. Clients may choose to use it or roll their own implementation.
 
 ## Installation
 
