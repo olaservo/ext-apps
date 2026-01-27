@@ -22,12 +22,10 @@ html, body {
   --link-color: rgba(128, 128, 128, 0.5);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg-color: #1e1e1e;
-    --text-color: #e0e0e0;
-    --border-color: #444444;
-  }
+[data-theme="dark"] {
+  --bg-color: #1e1e1e;
+  --text-color: #e0e0e0;
+  --border-color: #444444;
 }
 
 body {

@@ -1,7 +1,13 @@
 /**
  * Wiki Explorer - Force-directed graph visualization of Wikipedia link networks
  */
-import { App, type McpUiHostContext } from "@modelcontextprotocol/ext-apps";
+import {
+  App,
+  applyDocumentTheme,
+  applyHostFonts,
+  applyHostStyleVariables,
+  type McpUiHostContext,
+} from "@modelcontextprotocol/ext-apps";
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import {
   forceCenter,
@@ -375,6 +381,15 @@ app.onerror = (err) => {
 };
 
 function handleHostContextChanged(ctx: McpUiHostContext) {
+  if (ctx.theme) {
+    applyDocumentTheme(ctx.theme);
+  }
+  if (ctx.styles?.variables) {
+    applyHostStyleVariables(ctx.styles.variables);
+  }
+  if (ctx.styles?.css?.fonts) {
+    applyHostFonts(ctx.styles.css.fonts);
+  }
   if (ctx.safeAreaInsets) {
     document.body.style.paddingTop = `${ctx.safeAreaInsets.top}px`;
     document.body.style.paddingRight = `${ctx.safeAreaInsets.right}px`;

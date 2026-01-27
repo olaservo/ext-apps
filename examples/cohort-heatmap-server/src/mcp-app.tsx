@@ -5,6 +5,11 @@
  * over time by signup month. Hover for details, click to drill down.
  */
 import type { App, McpUiHostContext } from "@modelcontextprotocol/ext-apps";
+import {
+  applyDocumentTheme,
+  applyHostFonts,
+  applyHostStyleVariables,
+} from "@modelcontextprotocol/ext-apps";
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import { StrictMode, useCallback, useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
@@ -50,6 +55,19 @@ type PeriodType = "monthly" | "weekly";
 
 const IMPLEMENTATION = { name: "Cohort Heatmap", version: "1.0.0" };
 
+// Apply host theme and styles to match the host application
+function applyHostContext(ctx: McpUiHostContext) {
+  if (ctx.theme) {
+    applyDocumentTheme(ctx.theme);
+  }
+  if (ctx.styles?.variables) {
+    applyHostStyleVariables(ctx.styles.variables);
+  }
+  if (ctx.styles?.css?.fonts) {
+    applyHostFonts(ctx.styles.css.fonts);
+  }
+}
+
 // Color scale function: Green (high) -> Yellow (medium) -> Red (low)
 function getRetentionColor(retention: number): string {
   const hue = retention * 120; // 0-120 range (red to green)
@@ -74,13 +92,18 @@ function CohortHeatmapApp() {
     onAppCreated: (app) => {
       app.onhostcontextchanged = (params) => {
         setHostContext((prev) => ({ ...prev, ...params }));
+        applyHostContext(params);
       };
     },
   });
 
   useEffect(() => {
     if (app) {
-      setHostContext(app.getHostContext());
+      const ctx = app.getHostContext();
+      setHostContext(ctx);
+      if (ctx) {
+        applyHostContext(ctx);
+      }
     }
   }, [app]);
 
