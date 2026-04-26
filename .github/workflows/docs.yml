@@ -4,6 +4,11 @@ on:
   workflow_dispatch:
   release:
     types: [published]
+  push:
+    branches: [main]
+    paths:
+      - "plugins/mcp-apps/skills/**"
+      - ".github/workflows/docs.yml"
 
 permissions:
   contents: write
@@ -21,6 +26,12 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run docs
+      - uses: agentskills/build-for-well-known@v1
+        with:
+          skills: ./plugins/mcp-apps/skills
+          output: ./docs/.well-known/agent-skills
+      # Jekyll silently drops directories starting with "."
+      - run: touch ./docs/.nojekyll
       - uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
